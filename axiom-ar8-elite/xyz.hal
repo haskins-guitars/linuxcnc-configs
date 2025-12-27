@@ -5,7 +5,7 @@
 net motion-enable => hm2_7i95.0.ssr.00.out-00
 
 # Clear servo alarms while stopped
-net motion-enable => hm2_7i95.0.ssr.00.out-01-not
+# net motion-enable => hm2_7i95.0.ssr.00.out-01-not
 
 # Axis: X Joint: 0 Output: 0
 #######################################

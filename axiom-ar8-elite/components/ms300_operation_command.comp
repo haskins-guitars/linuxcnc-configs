@@ -1,0 +1,19 @@
+component ms300_operation_command "Format data for MS300 Operation Command register (2000H)";
+pin in bit run_in;
+pin in bit forward_in;
+pin out u32 out;
+function _;
+license "GPL"; // indicates GPL v2 or later
+;;
+
+out = 0;
+
+if (run_in)
+    out += 2;
+else 
+    out += 1;
+
+if (forward_in)
+    out += 0x10;
+else
+    out += 0x20;

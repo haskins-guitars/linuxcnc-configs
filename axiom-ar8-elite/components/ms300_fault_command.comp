@@ -1,0 +1,12 @@
+component ms300_fault_command "Format data for MS300 Fault Command register (2002H)";
+pin in bit reset_in;
+pin in bit reset_in_not = 1;
+pin out u32 out;
+function _;
+license "GPL"; // indicates GPL v2 or later
+;;
+
+if (reset_in || !reset_in_not)
+    out = 2;
+else 
+    out = 0;

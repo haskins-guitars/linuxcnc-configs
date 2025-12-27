@@ -1,0 +1,15 @@
+component ms300_fault_status "Parse data for MS300 Fault Status register (2100H)";
+pin in u32 in;
+pin out bit has_warning;
+pin out u32 warning;
+pin out bit has_fault;
+pin out u32 fault;
+function _;
+license "GPL"; // indicates GPL v2 or later
+;;
+
+fault = in & 0xff;
+has_fault = fault != 0;
+
+warning = (in >> 8) & 0xff;
+has_warning = warning != 0;

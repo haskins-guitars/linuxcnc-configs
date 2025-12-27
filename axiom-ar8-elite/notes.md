@@ -17,8 +17,8 @@
 - Changed 09-03 from 0 to 2.0, detect timeout after 2 seconds
 - Changed 00-20 from 2 to 1 (485 frequency source)
 - Changed 00-21 from 1 to 2 (485 operation source)
-
-
+- Changed 02-00 from 1 (2-wire) to 0 (disabled)
+- Changed 00-23 from 1 (disable reverse) to 0 (allow forward/reverse)
 ```
 # clear reset
 setp delta_vfd_modbus.00.fault_command 2
