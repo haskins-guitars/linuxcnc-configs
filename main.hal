@@ -1,4 +1,4 @@
-# This file was created with the Mesa Configuration Tool on Dec 25 2025 01:32:10
+# This file was created with the Mesa Configuration Tool on Dec 26 2025 20:33:38
 # If you make changes to this file DO NOT run the configuration tool again!
 # This file will be replaced with a new file if you do!
 
@@ -10,9 +10,20 @@ loadrt [EMCMOT](EMCMOT) servo_period_nsec=[EMCMOT](SERVO_PERIOD) num_joints=[KIN
 
 # hostmot2 driver
 loadrt hostmot2
-loadrt [HM2](DRIVER) board_ip=[HM2](ADDRESS) config="num_encoders=6 num_pwmgens=1 num_stepgens=6 sserial_port_0=00000000"
+loadrt [HM2](DRIVER) board_ip=[HM2](ADDRESS) config="num_encoders=6 num_stepgens=6 sserial_port_0=00000000"
 
 setp hm2_[MESA](BOARD).0.watchdog.timeout_ns 5000000
+
+# Modbus for spindle VFD
+
+loadrt delta_vfd_modbus ports=hm2_[MESA](BOARD).0.pktuart.0
+addf delta_vfd_modbus.00 servo-thread
+
+setp delta_vfd_modbus.00.address [SPINDLE](MODBUS_ADDRESS)
+setp delta_vfd_modbus.00.baudrate [SPINDLE](BAUDRATE)
+
+# clear reset
+setp delta_vfd_modbus.00.fault_command 2
 
 loadrt pid names=pid.x,pid.y,pid.z
 
