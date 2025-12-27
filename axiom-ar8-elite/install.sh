@@ -1,4 +1,4 @@
-modcompile ./components/ms300-modbus.mod
-halcompile --install ./components/ms300-operation-command.comp
-halcompile --install ./components/ms300-fault-command.comp
-halcompile --install ./components/ms300-fault-status.comp
+modcompile ./components/ms300_modbus.mod
+halcompile --install ./components/ms300_operation_command.comp
+halcompile --install ./components/ms300_fault_command.comp
+halcompile --install ./components/ms300_fault_status.comp
