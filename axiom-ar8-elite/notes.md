@@ -1,5 +1,10 @@
 # Axiom AR8 Elite
 
+## TODO
+
+- Servo alarm inputs to `joint.N.amp-fault-in`
+- Homing switches
+
 ## Servo Drive configuration
 
 - Changed `PD01` from `1111` to `1110`

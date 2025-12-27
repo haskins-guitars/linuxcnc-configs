@@ -1,7 +1,0 @@
-# This file was created with the Mesa Configuration Tool on Dec 26 2025 20:33:38
-# If you make changes to this file DO NOT use the Configuration Tool
-
-# Inputs
-
-# Outputs
-net motion-enable => hm2_7i95.0.ssr.00.out-00
