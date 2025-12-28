@@ -9,7 +9,9 @@ Documentation for conversion from RichAuto B5x controller to LinuxCNC using a Me
 
 ## TODO
 
-- Map servo alarm inputs to `joint.N.amp-fault-in`.
+- TEST: Map servo alarm inputs to `joint.N.amp-fault-in`.
+- TEST: E-Stop input
+- TEST: Servo alarm reset
 - Use servo encoder feedback to do something other than warn on excess error.
 
 ## MESA I/O

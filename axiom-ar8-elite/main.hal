@@ -39,3 +39,4 @@ net motion-enable <= motion.motion-enabled
 # Standard I/O Block - EStop, Etc
 # create a signal for the estop loopback
 net estop-loopback iocontrol.0.emc-enable-in <= iocontrol.0.user-enable-out
+net hm2_[MESA](BOARD).0.inmux.0.input-07 => iocontrol.0.emc-enable-in
