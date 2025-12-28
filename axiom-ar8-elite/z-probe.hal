@@ -1,2 +1,2 @@
-net probe-in hm2_[MESA](BOARD).0.inmux.0.input-05 => motion.probe-in
+net probe-in hm2_[MESA](BOARD).0.inmux.00.input-05 => motion.probe-input
 
