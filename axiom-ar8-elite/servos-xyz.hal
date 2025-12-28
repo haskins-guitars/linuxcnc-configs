@@ -2,13 +2,23 @@
 #######################################
 
 # Motion Enable
-net motion-enable => hm2_7i95.0.ssr.00.out-00
+net motion-enable => [MESA](BOARD).0.ssr.00.out-00
 
 # Clear servo alarms while stopped
-# net motion-enable => hm2_7i95.0.ssr.00.out-01-not
+setp [MESA](BOARD).0.ssr.00.invert-01 1
+net motion-enable => [MESA](BOARD).0.ssr.00.out-01
 
 # Axis: X Joint: 0 Output: 0
 #######################################
+
+# Fault signal
+
+net hm2_[MESA](BOARD).0.inmux.0.input-16 => joint.0.amp_fault_in
+
+# Homing
+
+net hm2_[MESA](BOARD).0.inmux.0.input-00 => joint.0.home_sw_in
+net hm2_[MESA](BOARD).0.inmux.0.input-01 => joint.0.pos-lim-sw-in
 
 # PID Setup
 setp pid.x.Pgain [JOINT_0](P)
@@ -69,6 +79,15 @@ net joint.0.output => hm2_[MESA](BOARD).0.stepgen.00.velocity-cmd
 # Axis: Y Joint: 1 Output: 1
 #######################################
 
+# Fault signal
+
+net hm2_[MESA](BOARD).0.inmux.0.input-18 => joint.1.amp_fault_in
+
+# Homing
+
+net hm2_[MESA](BOARD).0.inmux.0.input-02 => joint.1.home_sw_in
+net hm2_[MESA](BOARD).0.inmux.0.input-03 => joint.1.pos-lim-sw-in
+
 # PID Setup
 setp pid.y.Pgain [JOINT_1](P)
 setp pid.y.Igain [JOINT_1](I)
@@ -126,6 +145,14 @@ net joint.1.output => hm2_[MESA](BOARD).0.stepgen.01.velocity-cmd
 
 # Axis: Z Joint: 2 Output: 2
 #######################################
+
+# Fault signal
+
+net hm2_[MESA](BOARD).0.inmux.0.input-20 => joint.2.amp_fault_in
+
+# Homing
+
+net hm2_[MESA](BOARD).0.inmux.0.input-04 => joint.2.home_sw_in
 
 # PID Setup
 setp pid.z.Pgain [JOINT_2](P)
