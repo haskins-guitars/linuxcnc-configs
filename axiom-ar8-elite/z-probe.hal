@@ -1,0 +1,2 @@
+net probe-in hm2_[MESA](BOARD).0.inmux.0.input-05 => motion.probe-in
+

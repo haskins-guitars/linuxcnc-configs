@@ -1,0 +1,9 @@
+<pyvcp>
+    <button>
+        <relief>RAISED</relief>
+        <bd>1</bd>
+        <halpin>"ztouch"</halpin>
+        <text>"Z TOUCH OFF"</text>
+        <font>crying"Arial", 8)</font>
+    </button>
+</pyvcp>
