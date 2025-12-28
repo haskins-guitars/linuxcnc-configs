@@ -2,23 +2,23 @@
 #######################################
 
 # Motion Enable
-net motion-enable => [MESA](BOARD).0.ssr.00.out-00
+net motion-enable => hm2_[MESA](BOARD).0.ssr.00.out-00
 
 # Clear servo alarms while stopped
-setp [MESA](BOARD).0.ssr.00.invert-01 1
-net motion-enable => [MESA](BOARD).0.ssr.00.out-01
+setp hm2_[MESA](BOARD).0.ssr.00.invert-01 1
+net motion-enable => hm2_[MESA](BOARD).0.ssr.00.out-01
 
 # Axis: X Joint: 0 Output: 0
 #######################################
 
 # Fault signal
 
-net hm2_[MESA](BOARD).0.inmux.0.input-16 => joint.0.amp_fault_in
+net joint-0-fault hm2_[MESA](BOARD).0.inmux.00.input-16 => joint.0.amp-fault-in
 
 # Homing
 
-net hm2_[MESA](BOARD).0.inmux.0.input-00 => joint.0.home_sw_in
-net hm2_[MESA](BOARD).0.inmux.0.input-01 => joint.0.pos-lim-sw-in
+net joint-0-home hm2_[MESA](BOARD).0.inmux.00.input-00 => joint.0.home-sw-in
+net joint-0-limit hm2_[MESA](BOARD).0.inmux.00.input-01 => joint.0.pos-lim-sw-in
 
 # PID Setup
 setp pid.x.Pgain [JOINT_0](P)
@@ -81,12 +81,12 @@ net joint.0.output => hm2_[MESA](BOARD).0.stepgen.00.velocity-cmd
 
 # Fault signal
 
-net hm2_[MESA](BOARD).0.inmux.0.input-18 => joint.1.amp_fault_in
+net joint-1-fault hm2_[MESA](BOARD).0.inmux.00.input-18 => joint.1.amp-fault-in
 
 # Homing
 
-net hm2_[MESA](BOARD).0.inmux.0.input-02 => joint.1.home_sw_in
-net hm2_[MESA](BOARD).0.inmux.0.input-03 => joint.1.pos-lim-sw-in
+net joint-1-home hm2_[MESA](BOARD).0.inmux.00.input-02 => joint.1.home-sw-in
+net joint-1-limit hm2_[MESA](BOARD).0.inmux.00.input-03 => joint.1.pos-lim-sw-in
 
 # PID Setup
 setp pid.y.Pgain [JOINT_1](P)
@@ -148,11 +148,11 @@ net joint.1.output => hm2_[MESA](BOARD).0.stepgen.01.velocity-cmd
 
 # Fault signal
 
-net hm2_[MESA](BOARD).0.inmux.0.input-20 => joint.2.amp_fault_in
+net joint-2-fault hm2_[MESA](BOARD).0.inmux.00.input-20 => joint.2.amp-fault-in
 
 # Homing
 
-net hm2_[MESA](BOARD).0.inmux.0.input-04 => joint.2.home_sw_in
+net joint-2-home hm2_[MESA](BOARD).0.inmux.00.input-04 => joint.2.home-sw-in
 
 # PID Setup
 setp pid.z.Pgain [JOINT_2](P)
