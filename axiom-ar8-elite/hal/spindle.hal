@@ -1,0 +1,55 @@
+#######################################
+# Modbus for spindle VFD
+#######################################
+loadrt ms300_modbus ports=hm2_[MESA](BOARD).0.pktuart.0
+addf ms300_modbus.00 servo-thread
+
+setp ms300_modbus.00.address 1
+setp ms300_modbus.00.baudrate 115200
+
+setp ms300_modbus.00.frequency-command-scale 0.6
+setp ms300_modbus.00.output-frequency-scale 0.6
+
+# Load module to format `Fault Command` register data
+
+loadrt ms300_fault_command names=spindle-fault-command
+addf spindle-fault-command servo-thread
+
+net spindle-fault-command ms300_modbus.00.fault-command <= spindle-fault-command.out
+
+# Load module to format `Operation Command` register data
+
+loadrt ms300_operation_command names=spindle-operation-command
+addf spindle-operation-command servo-thread
+
+net spindle-operation-command ms300_modbus.00.operation-command <= spindle-operation-command.out
+
+# Load module to parse `Fault Status` register data
+
+loadrt ms300_fault_status names=spindle-fault-status
+addf spindle-fault-status servo-thread
+
+# Reset faults while motion disabled
+net motion-enable => spindle-fault-command.reset-in-not
+
+# Link ms300 to `spindle`
+#######################################
+
+net spindle-forward spindle-operation-command.forward-in <= spindle.0.forward
+net spindle-run spindle-operation-command.run-in <= spindle.0.on
+net spindle-command ms300_modbus.00.frequency-command <= spindle.0.speed-out-abs
+
+net spindle-fault spindle.0.amp-fault-in <= spindle-fault-status.has-fault
+net spindle-estimated-speed spindle.0.speed-in <= ms300_modbus.00.output-frequency
+
+# compare commanded vs estimated spindle speed to set `spindle.at-speed`
+
+loadrt near names=spindle-speed-near-target
+addf spindle-speed-near-target servo-thread
+
+setp spindle-speed-near-target.scale 1.01
+
+net spindle-command => spindle-speed-near-target.in1
+net spindle-estimated-speed => spindle-speed-near-target.in2
+
+net spindle-at-speed spindle.0.at-speed <= spindle-speed-near-target.out

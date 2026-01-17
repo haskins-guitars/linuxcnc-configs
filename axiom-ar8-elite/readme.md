@@ -6,11 +6,12 @@ Documentation for conversion from RichAuto B5x controller to LinuxCNC using a Me
 
 - Clone to `~/linuxcnc/configs/axiom`
 - Run `./install.sh` to compile and install modules
+- Upload `7i95t_1v3pkt.bin` to 7i95T board.
 
 ## TODO
 
 - TEST: Map servo alarm inputs to `joint.N.amp-fault-in`.
-- TEST: E-Stop input
+- Connect: External E-Stop input
 - TEST: Servo alarm reset
 - Use servo encoder feedback to do something other than warn on excess error.
 
@@ -20,7 +21,7 @@ Outputs
 
 0. Servo Enable
 1. Servo Clear Alarm
-2. ATC Cover
+2. ATC Cover (future)
 3. Unused
 4. Unused
 5. Unused
@@ -35,8 +36,8 @@ Inputs
 5. Tool Setter (Puck)
 6. A Home
 7. E-Stop
-8. Tool setter (ATC)
-9. ATC IR
+8. Tool setter (ATC) (future)
+9. ATC (future)
 10. Unused
 11. Unused
 12. Unused
@@ -92,7 +93,7 @@ Solid = positive, white = negative in differential pairs
 ## Servo Drive configuration
 
 - Changed `PD01` from `1111` to `1110`
-  - Read `SON`, servo enable, from DI
+  - Read `SON` (servo enable) from DI
 
 ## VFD Harness
 
@@ -104,6 +105,8 @@ VFD is controlled and monitored using a combination of `mesa-modbus`, in `./comp
 
 HAL configuration is in `spindle.hal`.
 
+VFD configuration changes:
+
 - Changed 09-01 from 9.6 (9600 baud) to 115.2 (115200 baud)
 - Changed 09.02 from 3 (no fault on comms loss) to 2 (fault and ramp to stop on loss of comms from controllers)
 - Changed 09-03 from 0 (don't detect comms fault) to 2.0 (detect timeout after 2 seconds)
@@ -111,17 +114,3 @@ HAL configuration is in `spindle.hal`.
 - Changed 00-21 from 1 to 2 (485 operation source)
 - Changed 02-00 from 1 (2-wire) to 0 (disabled)
 - Changed 00-23 from 1 (disable reverse) to 0 (allow forward/reverse)
-
-```
-# clear reset
-setp delta_vfd_modbus.00.fault_command 2
-
-# set scale
-setp delta_vfd_modbus.00.frequency_command-scale 0.6
-
-# stop
-setp delta_vfd_modbus.00.operation_command 1
-
-# forward
-setp delta_vfd_modbus.00.operation_command 6
-```
