@@ -23,5 +23,5 @@ O<z_touch> sub
     O21 endif
     G38.2 Z-1 F5    (probe down using a slow feedrate to get better accuracy)
     G10 L20 P0 Z25    (set current WCS Z value = plate thickness)
-    G0 Z60        (move up 10mm above work piece)
+    G0 Z35        (move up 10mm above work piece)
 O<z_touch> endsub
