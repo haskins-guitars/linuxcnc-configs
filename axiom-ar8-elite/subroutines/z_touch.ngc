@@ -1,3 +1,5 @@
+; https://forum.linuxcnc.org/49-basic-configuration/50236-setting-up-a-basic-z-height-touch-off-probe-with-a-mesa-7i96
+
 O<z_touch> sub
 ; Cancel all Z offsets
     G92.1
