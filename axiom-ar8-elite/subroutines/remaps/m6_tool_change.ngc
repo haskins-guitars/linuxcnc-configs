@@ -19,7 +19,8 @@
 ; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 ; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ; SOFTWARE.
-o<tool_change> sub
+
+o<m6_tool_change> sub
 ;M73 ; Save and autorestore model states. This will be used only in case of error, otherwise we will invalidate it.
 
 O100 if [#<_task> EQ 0] ; we must execute this macro only in the milltask interpreter or preview will break, so test for '#<_task>' which is 1 for  the milltask interpreter and 0 in the UI's
@@ -87,5 +88,5 @@ o104 endif
 
 
 (print, End of Tool Change Program)
-o<tool_change> endsub [1]
+o<m6_tool_change> endsub [1]
 M2
