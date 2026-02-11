@@ -2,4 +2,8 @@ halshow.preferences
 autosave.halscope
 parameters.var
 parameters.var.bak
+qtdragon.pref
+tool.tbl
+tool.tbl.bak
 log.log
+__pycache__/

@@ -1,0 +1,15 @@
+o<m6_tool_change> sub
+M73 ; Save and autorestore model
+
+; Don't execute in UI preview
+O100 if [#<_task> EQ 0]
+        (print, Skipping in preview)
+O100     return [999]
+O100 endif
+
+(print, current pocket = #<current_pocket>, selected_pocket = #<selected_pocket>)
+(print, tool_in_spindle = #<tool_in_spindle>, selected_tool = #<selected_tool>)
+
+(print, End of Tool Change Program)
+o<m6_tool_change> endsub [1]
+M2
