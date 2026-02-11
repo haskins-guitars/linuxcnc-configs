@@ -24,7 +24,7 @@ o<m6_tool_change> sub
 ;M73 ; Save and autorestore model states. This will be used only in case of error, otherwise we will invalidate it.
 
 O100 if [#<_task> EQ 0] ; we must execute this macro only in the milltask interpreter or preview will break, so test for '#<_task>' which is 1 for  the milltask interpreter and 0 in the UI's
-        (print, Task is Null)
+        (print, Skipping in preview)
 O100     return [999]
 O100 endif
 
