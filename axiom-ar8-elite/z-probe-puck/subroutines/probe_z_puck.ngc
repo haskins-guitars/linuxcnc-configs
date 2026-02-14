@@ -1,33 +1,24 @@
-; https://forum.linuxcnc.org/49-basic-configuration/50236-setting-up-a-basic-z-height-touch-off-probe-with-a-mesa-7i96
+; Based on https://forum.linuxcnc.org/49-basic-configuration/50236-setting-up-a-basic-z-height-touch-off-probe-with-a-mesa-7i96
 
 O<probe_z_puck> sub
-    G92.1 (Cancel all G92 offsets)
-    G49 (Cancel G43 tool length offsets)
-    G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>] (Clear WCS Z offset)
+    M73 ; Save and autorestore modal states
+    G92.1 ; Cancel all G92 offsets
+    ; G49 ; Cancel G43 tool length offsets
+    ; G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>] ; Clear WCS Z offset
     G91 (Set incremental mode)
     
-    ; Force LinuxCNC to refresh hal pin states prior to reading HAL pin
-    M66 E0 L0
-    ; Check if probe is already tripped
-    O10 if [#<_hal[motion.probe-input]> EQ 1]
-        O10 return [-1]
-    O10 endif
+    ; Probe down using a fast feedrate
+    G38.2 Z[#<_ini[ZPUCK]SEARCH_DISTANCE>] F[#<_ini[ZPUCK]SEARCH_FEED>]
+    
+    ; Move up to latch distance
+    G0 Z[#<_ini[ZPUCK]LATCH_BACKOFF>] 
+    
+    ; Probe at latch speed/distance for more accurate reading
+    G38.2 Z[#<_ini[ZPUCK]LATCH_DISTANCE] F[#<_ini[ZPUCK]LATCH_FEED]
 
-    G38.2 Z-10 F25    (probe down using a fast feedrate)
-    G0 Z0.5        (move up by 0.5mm)
-
-    ; Allow a half second for the probe input to clear
-    G4 P0.5
+    ; Set current WCS Z value = plate thickness
+    G10 L20 P0 Z[#<_ini[ZPUCK]PUCK_THICKNESS]
     
-    ; Force LinuxCNC to refresh hal pin states prior to reading HAL pin
-    M66 E0 L0
-    ; Check if probe is already tripped
-    O21 if [#<_hal[motion.probe-input]> EQ 1]
-        O21 return [-1]
-    O21 endif
-    
-    G38.2 Z-1 F5    (probe down using a slow feedrate to get better accuracy)
-    G10 L20 P0 Z25    (set current WCS Z value = plate thickness)
-    
-    G0 Z35        (move up 10mm above work piece)
+    ; Raise above workpiece
+    G0 Z[#<_ini[ZPUCK]FINAL_BACKOFF]        
 O<probe_z_puck> endsub

@@ -9,29 +9,19 @@ o<_auto_probe_tool> sub
 
 #<tool> = #<selected_tool>
 #<pocket> = #<selected_pocket>
-; we must execute this only in the milltask interpreter
-; or preview will break, so test for '#<_task>' which is 1 for 
-; the milltask interpreter and 0 in the UI's
-O100 if [#<_task> EQ 0]
-        (print, Task is Null)
-O100     return [999]
-O100 endif
+
+m73 ; Save and autorestore modal states
 
 ; check we are in right mode
-O110 if [#<_metric_machine>]
-    O115 if [#<_imperial>]
-       (MSG, Auto Tool probe error: not in G21 mode )
-    O115 return [-3] ; indicate probe contact failure to epilog
-    O115 endif
-O110 else
-    O115 if [#<_imperial> EQ 0]
-       (MSG, Auto Tool probe error: not in G20 mode )
-    O115 return [-3] ; indicate probe contact failure to epilog
-    O115 endif
-O110 endif
+o110 if [#<_metric_machine>]
+    g21
+o110 else if [#<_imperial> EQ 0]
+    g20
+o110 endif
+
+F #<_hal[qtversaprobe.searchvel]>
 
 ;first go up
-F #<_hal[qtversaprobe.searchvel]>
 G53 G0 Z[#<_ini[CHANGE_POSITION]Z>]
 
 O125 if [#<_current_tool>  NE #<tool>]
@@ -76,8 +66,7 @@ F #<_hal[qtversaprobe.probevel]>
 G38.2 Z- [#<_hal[qtversaprobe.backoffdist]> *1.2]
 
 O500 if [#5070 EQ 0]
-G90
-O500 return [-3] ; indicate probe contact failure to epilog
+    return [-3] ; indicate probe contact failure to epilog
 O500 endif
 
 G90

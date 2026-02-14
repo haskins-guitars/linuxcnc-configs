@@ -1,75 +1,216 @@
-o<rapidchange_m6> sub
-M73 ; Save and autorestore model
+o<rapidchange_hammer> sub
+    ; 0 = CW = Pickup
+    ; 1 = CCW = Drop
+    #<dir> = #1
+    ; Number of attempts if IR is not in expected state
+    #<i> = #2
 
-; Don't execute in UI preview
-O100 if [#<_task> EQ 0]
+    o210 while [#<i> ge 0]
+        #<i> = [#<i> - 1]
+        (print, Engaging RapidChange)
+
+        ; Move close to pocket
+        G53 G0 Z[#<_ini[RAPIDCHANGE]ENGAGE_Z_START>]
+
+        o213 if[#<dir> EQ 0]
+            ; Spindle on
+            M4 S[#<_ini[RAPIDCHANGE]ENGAGE_RPM>]
+        o213 else
+            ; Spindle on
+            M5 S[#<_ini[RAPIDCHANGE]ENGAGE_RPM>]
+        o213 endif
+
+        ; Lower into pocket
+        G53 G1 Z[#<_ini[RAPIDCHANGE]ENGAGE_Z_END>] F[#<_ini[RAPIDCHANGE]ENGAGE_Z_FEED>] 
+
+        ; Stop spindle
+        M5
+        
+        ; More to IR checking position
+        G53 G0 Z[#<_ini[RAPIDCHANGE]ENGAGE_Z_START>]
+
+        o211 if [#<_ini[RAPIDCHANGE]IR_DI> lt 0]
+            (print, Success. No IR DI configured, assuming success.)
+            return [1]
+        o211 endif
+        
+        M66 P[#<_ini[RAPIDCHANGE]IR_DI>] L0  ; Check that IR sensor is indicating no tool
+        
+        o212 if [#<dir> eq 0 and #5399 eq 0]
+            ; Picking up tool
+            (print, Success! Tool detected)
+            return [1]
+        o212 else
+            ; Dropping tool
+            (print, Success! No tool detected)
+            return [1]
+        o212 endif
+
+        (print, Failed! Attempts remaining #<i>)
+    o210 endwhile
+
+    (print, Failed! Attempts exceeded.)
+o<rapidchange_hammer> endsub [0]
+
+o<rapidchange_probe> sub
+    ; Don't execute in UI preview
+    O100 if [#<_task> EQ 0]
         (print, Skipping in preview)
-O100     return [999]
-O100 endif
+    O100     return [999]
+    O100 endif
 
-(print, current_pocket = #<current_pocket>, selected_pocket = #<selected_pocket>)
-(print, rc_current_pocket= #<rc_current_pocket>, rc_selected_pocket = #<rc_selected_pocket>)
-(print, tool_in_spindle = #<tool_in_spindle>, selected_tool = #<selected_tool>)
+    m73 ; Save and autorestore modal states
 
-M73 ; Save and autorestore modal states
-G61 ; Use exact stop mode
-G90 ; Ensure everything that we do is done in absolute coordinates
-G40 ; Cutter comp off, otherwise G53 might go wrong
+    o110 if [#<_metric_machine>]
+        g21
+    o110 else if [#<_imperial> EQ 0]
+        g20
+    o110 endif
 
-; move to safe Z
-O110 if [#<rc_do_any_action> EQ 1]
+    (print, Probing tool length)
+
+    G49 ; Clear existing tool length
+
+    ; Move to safe Z
+    G53 G0 Z[#<_ini[RAPIDCHANGE]SAFE_Z>]
+
+    ; Move to tool setter XY
+    G53 G0 X[#<_ini[RAPIDCHANGE]TOOLSET_X>] Y[#<_ini[RAPIDCHANGE]TOOLSET_Y>]
+
+    G91 ; Set incremental
+
+    ; Probe down using a fast feedrate
+    G38.2 Z[#<_ini[RAPIDCHANGE]TOOLSET_SEARCH_DISTANCE>] F[#<_ini[RAPIDCHANGE]TOOLSET_SEARCH_FEED>]
+
+    ; Move up to latch distance
+    G0 Z[#<_ini[RAPIDCHANGE]TOOLSET_LATCH_BACKOFF>] 
+    ; Allow a half second for the probe input to clear
+    G4 P0.5
+    
+    ; Probe at latch speed/distance for more accurate reading
+    G38.2 Z[#<_ini[RAPIDCHANGE]TOOLSET_LATCH_DISTANCE] F[#<_ini[RAPIDCHANGE]TOOLSET_LATCH_FEED]
+
+    ; Calculate tool length
+    ; Find Z offset of current WCS (#5220), for example #5223 stores WCS1 Z offset
+    #<wcs_z_offset> = #[5203 + #5220 * 20]
+    ; Combined G92 and G52 offsets(#5213) if enabled (#5210 = 1)
+    #<corordinate_z_offset> = [#5213 * #5210]
+    #<total_z_offset> = [#<wcs_z_offset> + #<corordinate_z_offset> + #<_hal[RAPIDCHANGE]TOOLSET_HEIGHT>]
+    
+    (print, wcs_z_offset=#<wcs_z_offset>, corordinate_z_offset=#<corordinate_z_offset>, TOOLSET_HEIGHT=#<_hal[RAPIDCHANGE]TOOLSET_HEIGHT>, total_z_offset=#<total_z_offset>)
+    
+    (print, Saving tool length)
+    G10 L1 P#<current_tool> Z#<total_z_offset> 
+    ; enable tool length compenstation
+    G43
+
+    ; Move to safe Z
+    G53 G0 Z[#<_ini[RAPIDCHANGE]SAFE_Z>]
+o<rapidchange_probe> endsub [1]
+
+o<rapidchange_m6> sub
+    ; Don't execute in UI preview
+    O100 if [#<_task> EQ 0]
+        (print, Skipping in preview)
+    O100     return [999]
+    O100 endif
+
+    m73 ; Save and autorestore modal states
+
+    o110 if [#<_metric_machine>]
+        g21
+    o110 else if [#<_imperial> EQ 0]
+        g20
+    o110 endif
+
+    (print, current_pocket = #<current_pocket>, selected_pocket = #<selected_pocket>)
+    (print, rc_current_pocket= #<rc_current_pocket>, rc_selected_pocket = #<rc_selected_pocket>)
+    (print, tool_in_spindle = #<tool_in_spindle>, selected_tool = #<selected_tool>)
+
+    G61 ; Use exact stop mode
+    G90 ; Ensure everything that we do is done in absolute coordinates
+
+    #<original_x> = [#<_x>]
+    #<original_y> = [#<_y>]
+    #<original_z> = [#<_z>]
+
+    ; Move to safe Z
+    o110 if[#<rc_do_any_action> eq 1]
         (print, Moving to safe Z)
         ; move to safe Z
         G53 G0 Z[#<_ini[RAPIDCHANGE]SAFE_Z>]
-O110 endif
+    o110 endif
 
-; do manual tool drop
-O120 if [#<rc_do_manual_drop> EQ 1]
+    ; Do manual tool drop
+    o120 if[#<rc_do_manual_drop> eq 1]
         (print, Moving for manual tool drop)
         ; move
+        G53 G0 Z[#<_ini[RAPIDCHANGE]SAFE_Z>]
         G53 G0 X[#<_ini[RAPIDCHANGE]MANUAL_CHANGE_X>] Y[#<_ini[RAPIDCHANGE]MANUAL_CHANGE_Y>]
 
         ; set DO to trigger hal_manualtoolchange
         ; wait for DI from hal_manualtoolchange to continue
-O120 endif
+    o120 endif
 
-; do RC tool drop
-O130 if [#<rc_do_rc_drop> EQ 1]
+    ; Do RC tool drop
+    o130 if [#<rc_do_rc_drop> EQ 1]
         (print, Dropping tool #<tool_in_spindle> at #<rc_drop_x>,#<rc_drop_y>)
         ; move to rc_drop_x, rc_drop_y
         G53 G0 X[#<rc_drop_x>] Y[#<rc_drop_y>]
-        ; do hammering
-O130 endif
 
-; do manual tool pickup
-O140 if [#<rc_do_manual_pickup> EQ 1]
+        ; Attempt enagage, remove tool, 1 attempt
+        o<rapidchange_hammer> call [1] [1]
+        o131 if [#<value> LE 0]
+            ; Drop failed
+            return [0]
+        o131 endif
+    o130 endif
+
+    ; Run builtin M6 to update tool data
+    m6 
+
+    ; Do manual tool pickup
+    o140 if [#<rc_do_manual_pickup> EQ 1]
         (print, Moving for manual tool pickup)
         ; move
+        G53 G0 Z[#<_ini[RAPIDCHANGE]SAFE_Z>]
+        G53 G0 X[#<_ini[RAPIDCHANGE]MANUAL_CHANGE_X>] Y[#<_ini[RAPIDCHANGE]MANUAL_CHANGE_Y>]
         ; set DO to trigger hal_manualtoolchange
         ; wait for DI from hal_manualtoolchange to continue
-O140 endif
+    o140 endif
 
-; do RC tool pickup
-O150 if [#<rc_do_rc_pickup> EQ 1]
+    ; Do RC tool pickup
+    o150 if [#<rc_do_rc_pickup> EQ 1]
         (print, Pickup tool #<selected_tool> at #<rc_pickup_x>,#<rc_pickup_y>)
         ; move to rc_pickup_x, rc_pickup_y
+        G53 G0 X[#<rc_pickup_x>] Y[#<rc_pickup_y>]
 
-        ; do hammering
-O160 endif
+        ; Attempt enagage, remove tool, 1 attempt
+        o<enage_rc> call [0] [1]
+        o131 if [#<value> LE 0]
+            ; Pickup failed
+            return [0]
+        o131 endif
+    o160 endif
 
-; probe new tool
-O160 if [#<rc_do_probe> EQ 1]
+    ; Probe new tool
+    o160 if [#<rc_do_probe> EQ 1]
         (print, Probing)
         G49 ; clear current tool offset
-O160 endif
+    o160 endif
 
-O110 if [#<rc_do_any_action> EQ 1]
+    ; Return to starting position
+    o110 if [#<rc_do_any_action> EQ 1]
         (print, Restoring original position)
         ; move to safe Z
+        G53 G0 Z[#<_ini[RAPIDCHANGE]SAFE_Z>]
         ; restore XY
-        ; restore Z
-O110 endif
+        G53 G0 X[#<original_x] Y[#<original_y>]
+        ; restore Z, WITHOUT G53
+        G0 Z[#<original_z]
+    o110 endif
 
-(print, End of Tool Change Program)
+    (print, End of Tool Change Program)
 o<rapidchange_m6> endsub [1]
+
 M2
