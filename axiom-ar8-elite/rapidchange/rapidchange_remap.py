@@ -13,6 +13,7 @@ class RapidChangeConfig:
         self.POCKET_BASE_Y = self.read_ini_value("POCKET_BASE_Y")
         self.POCKET_OFFSET_X = self.read_ini_value("POCKET_OFFSET_X")
         self.POCKET_OFFSET_Y = self.read_ini_value("POCKET_OFFSET_Y")
+        self.NUM_POCKETS = self.read_ini_value("NUM_POCKETS")
 
         print(pprint.pp(vars(self)))
     
@@ -45,10 +46,13 @@ def get_pocket_xy(self, pocket):
 def rapidchange_change_prolog(self, **words):
     try:
         if self.selected_pocket < 0:
-            self.set_errormsg("M6: no tool prepared")
+            self.set_errormsg("M6: No tool prepared")
             return INTERP_ERROR
         if self.cutter_comp_side:
-            self.set_errormsg("Cannot change tools with cutter radius compensation on")
+            self.set_errormsg("M6: Cutter radius compensation must be off")
+            return INTERP_ERROR
+        if self.spindle_turing != CANON_DIRECTION.CANON_STOPPED:
+            self.set_errormsg("M6: Spindle must be stopped")
             return INTERP_ERROR
         
         # Required for default epilog
@@ -69,21 +73,56 @@ def rapidchange_change_prolog(self, **words):
         self.params["rc_current_pocket"] = rc_current_pocket
         self.params["rc_selected_pocket"] = rc_selected_pocket
 
-        do_drop = self.current_tool > 0 and self.current_tool != self.selected_tool
+        current_tool_in_rc = \
+            rc_current_pocket > 0 \
+            and rc_current_pocket <= self.rapdidchange.NUM_POCKETS
+        
+        do_rc_drop = \
+            self.current_tool > 0 \
+            and current_tool_in_rc \
+            and self.current_tool != self.selected_tool
+        
+        do_manual_drop = \
+            self.current_tool > 0 \
+            and not current_tool_in_rc \
+            and self.current_tool != self.selected_tool
+        
         drop_xy = get_pocket_xy(self, rc_current_pocket)
 
-        self.params["rc_do_drop"] = 1 if do_drop else 0
+        self.params["rc_do_rc_drop"] = 1 if do_rc_drop else 0
+        self.params["rc_do_manual_drop"] = 1 if do_manual_drop else 0
         self.params["rc_drop_x"] = drop_xy[0]
         self.params["rc_drop_y"] = drop_xy[1]
 
-        do_pickup = self.selected_tool > 0 and self.current_tool != self.selected_tool
+        selected_tool_in_rc = \
+            rc_selected_pocket > 0 \
+            and rc_selected_pocket <= self.rapdidchange.NUM_POCKETS
+        
+        do_rc_pickup = \
+            self.selected_tool > 0 \
+            and selected_tool_in_rc \
+            and self.current_tool != self.selected_tool
+        
+        do_manual_pickup = \
+            self.selected_tool > 0 \
+            and selected_tool_in_rc \
+            and self.current_tool != self.selected_tool
+        
         pickup_xy = get_pocket_xy(self, rc_selected_pocket)
-        self.params["rc_do_pickup"] = 1 if do_pickup else 0
+        self.params["rc_do_pickup"] = 1 if do_rc_pickup else 0
+        self.params["rc_do_manual_pickup"] = 1 if do_manual_pickup else 0
         self.params["rc_pickup_x"] = pickup_xy[0]
         self.params["rc_pickup_y"] = pickup_xy[1]
 
         do_probe = self.selected_tool != 0
         self.params["rc_do_probe"] = 1 if do_probe else 0
+
+        do_any_action = \
+            do_rc_drop or do_manual_drop \
+            or do_rc_pickup or do_rc_pickup \
+            or do_probe 
+        
+        self.params["rc_do_any_action"] = 1 if do_any_action else 0
 
         return INTERP_OK
     except Exception as e:

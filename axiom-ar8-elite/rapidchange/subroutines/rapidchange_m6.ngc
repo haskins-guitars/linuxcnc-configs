@@ -11,17 +11,64 @@ O100 endif
 (print, rc_current_pocket= #<rc_current_pocket>, rc_selected_pocket = #<rc_selected_pocket>)
 (print, tool_in_spindle = #<tool_in_spindle>, selected_tool = #<selected_tool>)
 
-O101 if [#<rc_do_drop> EQ 1]
+M73 ; Save and autorestore modal states
+G61 ; Use exact stop mode
+G90 ; Ensure everything that we do is done in absolute coordinates
+G40 ; Cutter comp off, otherwise G53 might go wrong
+
+; move to safe Z
+O110 if [#<rc_do_any_action> EQ 1]
+        (print, Moving to safe Z)
+        ; move to safe Z
+        G53 G0 Z[#<_ini[RAPIDCHANGE]SAFE_Z>]
+O110 endif
+
+; do manual tool drop
+O120 if [#<rc_do_manual_drop> EQ 1]
+        (print, Moving for manual tool drop)
+        ; move
+        G53 G0 X[#<_ini[RAPIDCHANGE]MANUAL_CHANGE_X>] Y[#<_ini[RAPIDCHANGE]MANUAL_CHANGE_Y>]
+
+        ; set DO to trigger hal_manualtoolchange
+        ; wait for DI from hal_manualtoolchange to continue
+O120 endif
+
+; do RC tool drop
+O130 if [#<rc_do_rc_drop> EQ 1]
         (print, Dropping tool #<tool_in_spindle> at #<rc_drop_x>,#<rc_drop_y>)
-O101 endif
+        ; move to rc_drop_x, rc_drop_y
+        G53 G0 X[#<rc_drop_x>] Y[#<rc_drop_y>]
+        ; do hammering
+O130 endif
 
-O102 if [#<rc_do_pickup> EQ 1]
+; do manual tool pickup
+O140 if [#<rc_do_manual_pickup> EQ 1]
+        (print, Moving for manual tool pickup)
+        ; move
+        ; set DO to trigger hal_manualtoolchange
+        ; wait for DI from hal_manualtoolchange to continue
+O140 endif
+
+; do RC tool pickup
+O150 if [#<rc_do_rc_pickup> EQ 1]
         (print, Pickup tool #<selected_tool> at #<rc_pickup_x>,#<rc_pickup_y>)
-O102 endif
+        ; move to rc_pickup_x, rc_pickup_y
 
-O103 if [#<rc_do_probe> EQ 1]
+        ; do hammering
+O160 endif
+
+; probe new tool
+O160 if [#<rc_do_probe> EQ 1]
         (print, Probing)
-O103 endif
+        G49 ; clear current tool offset
+O160 endif
+
+O110 if [#<rc_do_any_action> EQ 1]
+        (print, Restoring original position)
+        ; move to safe Z
+        ; restore XY
+        ; restore Z
+O110 endif
 
 (print, End of Tool Change Program)
 o<rapidchange_m6> endsub [1]
