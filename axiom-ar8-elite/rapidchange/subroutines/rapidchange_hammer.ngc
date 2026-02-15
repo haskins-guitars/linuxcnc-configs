@@ -1,0 +1,62 @@
+o<rapidchange_hammer> sub
+    ; 0 = CW = Pickup
+    ; 1 = CCW = Drop
+    #<dir> = #1
+    ; Number of attempts if IR is not in expected state
+    #<i> = #2
+
+    o210 while [#<i> gt 0]
+        #<i> = [#<i> - 1]
+        (print, Engaging RapidChange)
+
+        ; Move close to pocket
+        G53 G0 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_START>]
+
+        o213 if[#<dir> EQ 0]
+            ; Spindle on
+            (print, CW/Picking up)
+            M3 S[#<_ini[RAPIDCHANGEATC]ENGAGE_RPM>]
+        o213 else
+            ; Spindle on
+            (print, CCW/Dropping)
+            M4 S[#<_ini[RAPIDCHANGEATC]ENGAGE_RPM>]
+        o213 endif
+
+        ; Lower into pocket
+        G53 G1 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_END>] F[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_FEED>] 
+
+        ; Dwell to give time to thread on/off
+        G04 P1.0
+        ; Stop spindle
+        M5
+        ; Dwell to allow spindle to stop
+        G04 P0.2
+        
+        ; More to IR checking position
+        G53 G0 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_START>]
+
+        o211 if [#<_ini[RAPIDCHANGEATC]IR_DI> ge 0]
+            M66 P[#<_ini[RAPIDCHANGEATC]IR_DI>] L0  ; Check that IR sensor is indicating no tool
+        
+            o212 if [#<dir> eq 0 and #5399 eq 0]
+                ; Picking up tool
+                (print, Success! Tool detected)
+            o212 return [1]
+            o212 else
+                ; Dropping tool
+                (print, Success! No tool detected)
+            o212 return [1]
+        o211 endif
+
+        (print, Hammers remaining #<i>)
+    o210 endwhile
+
+    o250 if [#<_ini[RAPIDCHANGEATC]IR_DI> lt 0]
+        (print, Success. No IR DI configured, assuming success.)
+    o250 return [1]
+    o250 endif
+        
+    (print, Failed! Attempts exceeded.)
+o<rapidchange_hammer> endsub [0]
+
+M2

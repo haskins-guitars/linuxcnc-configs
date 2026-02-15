@@ -48,12 +48,14 @@ def rapidchange_change_prolog(self, **words):
         if self.selected_pocket < 0:
             self.set_errormsg("M6: No tool prepared")
             return INTERP_ERROR
+        
         if self.cutter_comp_side:
             self.set_errormsg("M6: Cutter radius compensation must be off")
             return INTERP_ERROR
-        if self.spindle_turing != CANON_DIRECTION.CANON_STOPPED:
-            self.set_errormsg("M6: Spindle must be stopped")
-            return INTERP_ERROR
+
+        # if self.spindle_turning[0] != CANON_DIRECTION.CANON_STOPPED:
+        #     self.set_errormsg("M6: Spindle must be stopped")
+        #     return INTERP_ERROR
         
         # Required for default epilog
         self.params["tool_in_spindle"] = self.current_tool
@@ -75,7 +77,7 @@ def rapidchange_change_prolog(self, **words):
 
         current_tool_in_rc = \
             rc_current_pocket > 0 \
-            and rc_current_pocket <= self.rapdidchange.NUM_POCKETS
+            and rc_current_pocket <= self.rapidchange.NUM_POCKETS
         
         do_rc_drop = \
             self.current_tool > 0 \
@@ -96,7 +98,7 @@ def rapidchange_change_prolog(self, **words):
 
         selected_tool_in_rc = \
             rc_selected_pocket > 0 \
-            and rc_selected_pocket <= self.rapdidchange.NUM_POCKETS
+            and rc_selected_pocket <= self.rapidchange.NUM_POCKETS
         
         do_rc_pickup = \
             self.selected_tool > 0 \
@@ -105,11 +107,11 @@ def rapidchange_change_prolog(self, **words):
         
         do_manual_pickup = \
             self.selected_tool > 0 \
-            and selected_tool_in_rc \
+            and not selected_tool_in_rc \
             and self.current_tool != self.selected_tool
         
         pickup_xy = get_pocket_xy(self, rc_selected_pocket)
-        self.params["rc_do_pickup"] = 1 if do_rc_pickup else 0
+        self.params["rc_do_rc_pickup"] = 1 if do_rc_pickup else 0
         self.params["rc_do_manual_pickup"] = 1 if do_manual_pickup else 0
         self.params["rc_pickup_x"] = pickup_xy[0]
         self.params["rc_pickup_y"] = pickup_xy[1]
@@ -126,5 +128,5 @@ def rapidchange_change_prolog(self, **words):
 
         return INTERP_OK
     except Exception as e:
-        self.set_errormsg("M6/change_prolog: %s" % (e))
+        self.set_errormsg("M6/raidchange_change_prolog: %s" % (e))
         return INTERP_ERROR
