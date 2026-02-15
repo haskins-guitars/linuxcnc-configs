@@ -1,0 +1,17 @@
+net rapidchange-dust-cover      motion.digital-out-00   => hm2_[MESA](BOARD).0.ssr.00.out-06
+net rapidchange-ir              motion.digital-in-00    <= hm2_[MESA](BOARD).0.inmux.00.input-16
+net rapidchange-toolsetter      hm2_[MESA](BOARD).0.inmux.00.input-16
+
+# If no other probes
+#   net rapidchange-toolsetter motion.probe-input
+# If other probes
+#   loadrt or2 names=probes
+#   addf or2 servo-thread
+#   net rapidchange-toolsetter  or2.in0
+#   net other-probe             or2.in1
+#   net any-probe               or2.out => motion.probe-input
+
+
+# Loopback default tool change iocontrol
+net tool-prepare-loopback iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
+net tool-change-loopback iocontrol.0.tool-change => iocontrol.0.tool-changed

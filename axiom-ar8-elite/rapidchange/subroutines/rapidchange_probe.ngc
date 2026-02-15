@@ -1,4 +1,4 @@
-
+; Probe tool length using RapidChange tool setter
 o<rapidchange_probe> sub
     ; Don't execute in UI preview
     O100 if [#<_task> EQ 0]
@@ -6,7 +6,7 @@ o<rapidchange_probe> sub
     O100     return [999]
     O100 endif
 
-    m73 ; Save and autorestore modal states
+    M73 ; Save and autorestore modal states
 
     o110 if [#<_metric_machine>]
         g21

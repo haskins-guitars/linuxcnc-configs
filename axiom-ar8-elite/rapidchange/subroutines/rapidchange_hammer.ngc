@@ -1,3 +1,4 @@
+; Load/unload tool from RapidChange pocket at the current X/Y position
 o<rapidchange_hammer> sub
     ; 0 = CW = Pickup
     ; 1 = CCW = Drop
@@ -15,11 +16,11 @@ o<rapidchange_hammer> sub
         o213 if[#<dir> EQ 0]
             ; Spindle on
             (print, CW/Picking up)
-            M3 S[#<_ini[RAPIDCHANGEATC]ENGAGE_RPM>]
+            M3 S[#<_ini[RAPIDCHANGEATC]ENGAGE_LOAD_RPM>]
         o213 else
             ; Spindle on
             (print, CCW/Dropping)
-            M4 S[#<_ini[RAPIDCHANGEATC]ENGAGE_RPM>]
+            M4 S[#<_ini[RAPIDCHANGEATC]ENGAGE_UNLOAD_RPM>]
         o213 endif
 
         ; Lower into pocket

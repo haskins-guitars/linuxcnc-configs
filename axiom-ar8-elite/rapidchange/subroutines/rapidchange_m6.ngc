@@ -1,3 +1,5 @@
+; Remapped M6 behavior for RapidChange ATC
+; Must use rapidchange_change_prolog which calculates pocket positions and determines which steps to execute.
 o<rapidchange_m6> sub
     ; Don't execute in UI preview
     O100 if [#<_task> EQ 0]
@@ -19,6 +21,7 @@ o<rapidchange_m6> sub
     G61 ; Use exact stop mode
     G90 ; Ensure everything that we do is done in absolute coordinates
 
+    ; Store original position to return to
     #<original_x> = #<_x>
     #<original_y> = #<_y>
     #<original_z> = #<_z>
@@ -48,7 +51,7 @@ o<rapidchange_m6> sub
         G53 G0 X[#<rc_drop_x>] Y[#<rc_drop_y>]
 
         ; Attempt enagage, remove tool, 1 attempt
-        o<rapidchange_hammer> call [1] [2]
+        o<rapidchange_hammer> call [1] [#<_ini[RAPIDCHANGEATC]ENGAGE_UNLOAD_STRIKES>]
         o131 if [#<_value> LE 0]
             ; Drop failed
         o131 return [0]
@@ -75,7 +78,7 @@ o<rapidchange_m6> sub
         G53 G0 X[#<rc_pickup_x>] Y[#<rc_pickup_y>]
 
         ; Attempt enagage, remove tool, 1 attempt
-        o<rapidchange_hammer> call [0] [2]
+        o<rapidchange_hammer> call [0] [#<_ini[RAPIDCHANGEATC]ENGAGE_LOAD_STRIKES>]
         o151 if [#<_value> LE 0]
             ; Pickup failed
         0151 return [0]
@@ -91,7 +94,7 @@ o<rapidchange_m6> sub
         G49 ; clear current tool offset
     o160 endif
 
-    ; Return to starting position
+    ; Return to original position
     o170 if [#<rc_do_any_action> EQ 1]
         (print, Restoring original position)
         ; move to safe Z

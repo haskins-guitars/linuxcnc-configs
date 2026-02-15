@@ -1,6 +1,5 @@
 import os
 import remap
-import pprint
 
 def __init__(self):
     # handle any per-module initialisation tasks here

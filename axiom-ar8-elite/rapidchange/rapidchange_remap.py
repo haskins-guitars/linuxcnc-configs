@@ -1,9 +1,10 @@
-import pprint
 import os
 import linuxcnc
 from interpreter import *
-from emccanon import MESSAGE
 throw_exceptions = 1
+
+def init_rapidchange(self):
+    self.rapidchange = RapidChangeConfig()
 
 class RapidChangeConfig:
     def __init__(self):
@@ -16,16 +17,11 @@ class RapidChangeConfig:
         self.POCKET_OFFSET_Y = self.read_ini_value("POCKET_OFFSET_Y")
         self.NUM_POCKETS = self.read_ini_value("NUM_POCKETS")
 
-        print(pprint.pp(vars(self)))
-    
     def read_ini_value(self, key):
         val = self.inifile.find("RAPIDCHANGEATC", key)
         if val is None:
             raise ValueError("Couldn't find RAPIDCHANGEATC.%s", key)
         return float(val)
-
-def init_rapidchange(self):
-    self.rapidchange = RapidChangeConfig()
 
 # Calculate X/Y position of given pocket
 def get_pocket_xy(self, pocket):
@@ -72,7 +68,7 @@ def rapidchange_change_prolog(self, **words):
 
         # I really want to check for spindle_turning, but looks like there's a bug in LinuxCNC so you can't access that from Python
 
-        # if self.spindle_turning[0] != CANON_DIRECTION.CANON_STOPPED:
+        # if self.spindle_turning != CANON_DIRECTION.CANON_STOPPED:
         #     self.set_errormsg("M6: Spindle must be stopped")
         #     return INTERP_ERROR
         
@@ -151,3 +147,4 @@ def rapidchange_change_prolog(self, **words):
     except Exception as e:
         self.set_errormsg("M6/raidchange_change_prolog: %s" % (e))
         return INTERP_ERROR
+    
