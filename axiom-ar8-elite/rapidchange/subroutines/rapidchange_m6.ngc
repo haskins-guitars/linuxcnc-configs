@@ -13,7 +13,6 @@ o<rapidchange_m6> sub
         g20
     o110 endif
 
-    (print, current_pocket = #<current_pocket>, selected_pocket = #<selected_pocket>)
     (print, rc_current_pocket= #<rc_current_pocket>, rc_selected_pocket = #<rc_selected_pocket>)
     (print, tool_in_spindle = #<tool_in_spindle>, selected_tool = #<selected_tool>)
 

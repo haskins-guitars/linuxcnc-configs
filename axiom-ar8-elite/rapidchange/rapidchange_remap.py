@@ -7,6 +7,7 @@ throw_exceptions = 1
 
 class RapidChangeConfig:
     def __init__(self):
+        # Read RapidChange values from ini file once at startup
         self.inifile = linuxcnc.ini(os.environ['INI_FILE_NAME'])
 
         self.POCKET_BASE_X = self.read_ini_value("POCKET_BASE_X")
@@ -26,22 +27,38 @@ class RapidChangeConfig:
 def init_rapidchange(self):
     self.rapidchange = RapidChangeConfig()
 
+# Calculate X/Y position of given pocket
 def get_pocket_xy(self, pocket):
     x = self.rapidchange.POCKET_BASE_X + self.rapidchange.POCKET_OFFSET_X * (pocket - 1)
     y = self.rapidchange.POCKET_BASE_Y + self.rapidchange.POCKET_OFFSET_Y * (pocket - 1)
 
     return (x, y)
 
-# REMAP=M6  modalgroup=6 prolog=rc_change_prolog ngc=change epilog=change_epilog
-# parameters required for epilog:
-#    #<tool_in_spindle>
-#    #<selected_tool>
-#    #<current_pocket>
-#    #<selected_pocket>
+# REMAP=M6  modalgroup=6 prolog=rapidchange_change_prolog ngc=rapidchange_m6 epilog=change_epilog
+#
+# Parameters required for default epilog:
+#    #<tool_in_spindle>     Tx value of current tool
+#    #<selected_tool>       Tx value of selected tool
+#    #<current_pocket>      Index in tool table of current tool
+#    #<selected_pocket>     Index in tool table of selected tool
 #
 # parameters required for remap ngc
+#   #<rc_current_pocket>    RapidChange pocket of the current tool
+#   #<rc_selected_pocket>   RapidChange pocket of the selected tool (most recent Tx)
+#   
 #
+#   #<rc_do_rc_drop>        1 if current tool should be dropped in RapidChange pocket
+#   #<rc_do_manual_drop>    1 if current tool should be dropped manually
+#   #<rc_drop_x>            X location of RapidChange pocket to drop at
+#   #<rc_drop_y>            Y location of RapidChange pocket to drop at
 #
+#   #<rc_do_rc_pickup>      1 if current tool should be dropped in RapidChange pocket
+#   #<rc_do_manual_pickup>  1 if current tool should be dropped manually
+#   #<rc_pickup_x>          X location of RapidChange pocket to drop at
+#   #<rc_pickup_y>          Y location of RapidChange pocket to drop at
+# 
+#   #<rc_do_probe>          1 if selected tool should be probed
+#   #<rc_do_any_action>     1 if doing any drop or probe. Used to supress move to safe Z when there's nothing to do.
 
 def rapidchange_change_prolog(self, **words):
     try:
@@ -53,6 +70,8 @@ def rapidchange_change_prolog(self, **words):
             self.set_errormsg("M6: Cutter radius compensation must be off")
             return INTERP_ERROR
 
+        # I really want to check for spindle_turning, but looks like there's a bug in LinuxCNC so you can't access that from Python
+
         # if self.spindle_turning[0] != CANON_DIRECTION.CANON_STOPPED:
         #     self.set_errormsg("M6: Spindle must be stopped")
         #     return INTERP_ERROR
@@ -63,14 +82,16 @@ def rapidchange_change_prolog(self, **words):
         self.params["current_pocket"] = self.current_pocket
         self.params["selected_pocket"] = self.selected_pocket
 
-        # Rapidchange params
-        rc_current_pocket = self.find_tool_pocket(self.current_tool)[1]
-        # if (rc_current_pocket[0] != 0):
-        #     raise ValueError("Current tool pocket not found %i" % self.current_tool)
+        # Get Px values from tool table for current and selected tools
+        current_ret, rc_current_pocket = self.find_tool_pocket(self.current_tool)
+        if (current_ret != 0 and self.current_tool != 0):
+            self.set_errormsg("Current tool, %i, not found in table" % self.current_tool)
+            return INTERP_ERROR
         
-        rc_selected_pocket = self.find_tool_pocket(self.selected_tool)[1]
-        # if (rc_current_pocket[0] != 0):
-        #     raise ValueError("Selected tool pocket not found %i" % self.selected_tool)
+        selected_ret, rc_selected_pocket = self.find_tool_pocket(self.selected_tool)
+        if (selected_ret != 0 and self.selected_tool != 0):
+            self.set_errormsg("Selected tool, %i, not found in table" % self.selected_tool)
+            return INTERP_ERROR
         
         self.params["rc_current_pocket"] = rc_current_pocket
         self.params["rc_selected_pocket"] = rc_selected_pocket
@@ -89,12 +110,12 @@ def rapidchange_change_prolog(self, **words):
             and not current_tool_in_rc \
             and self.current_tool != self.selected_tool
         
-        drop_xy = get_pocket_xy(self, rc_current_pocket)
+        drop_x, drop_y = get_pocket_xy(self, rc_current_pocket)
 
         self.params["rc_do_rc_drop"] = 1 if do_rc_drop else 0
         self.params["rc_do_manual_drop"] = 1 if do_manual_drop else 0
-        self.params["rc_drop_x"] = drop_xy[0]
-        self.params["rc_drop_y"] = drop_xy[1]
+        self.params["rc_drop_x"] = drop_x
+        self.params["rc_drop_y"] = drop_y
 
         selected_tool_in_rc = \
             rc_selected_pocket > 0 \
@@ -110,11 +131,11 @@ def rapidchange_change_prolog(self, **words):
             and not selected_tool_in_rc \
             and self.current_tool != self.selected_tool
         
-        pickup_xy = get_pocket_xy(self, rc_selected_pocket)
+        pickup_x, pickup_y = get_pocket_xy(self, rc_selected_pocket)
         self.params["rc_do_rc_pickup"] = 1 if do_rc_pickup else 0
         self.params["rc_do_manual_pickup"] = 1 if do_manual_pickup else 0
-        self.params["rc_pickup_x"] = pickup_xy[0]
-        self.params["rc_pickup_y"] = pickup_xy[1]
+        self.params["rc_pickup_x"] = pickup_x
+        self.params["rc_pickup_y"] = pickup_y
 
         do_probe = self.selected_tool != 0
         self.params["rc_do_probe"] = 1 if do_probe else 0
