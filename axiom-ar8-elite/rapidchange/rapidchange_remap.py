@@ -106,12 +106,14 @@ def rapidchange_change_prolog(self, **words):
             and not current_tool_in_rc \
             and self.current_tool != self.selected_tool
         
-        drop_x, drop_y = get_pocket_xy(self, rc_current_pocket)
 
-        self.params["rc_do_rc_drop"] = 1 if do_rc_drop else 0
         self.params["rc_do_manual_drop"] = 1 if do_manual_drop else 0
-        self.params["rc_drop_x"] = drop_x
-        self.params["rc_drop_y"] = drop_y
+        self.params["rc_do_rc_drop"] = 1 if do_rc_drop else 0
+
+        if do_rc_drop:
+            drop_x, drop_y = get_pocket_xy(self, rc_current_pocket)
+            self.params["rc_drop_x"] = drop_x
+            self.params["rc_drop_y"] = drop_y
 
         selected_tool_in_rc = \
             rc_selected_pocket > 0 \
@@ -127,11 +129,13 @@ def rapidchange_change_prolog(self, **words):
             and not selected_tool_in_rc \
             and self.current_tool != self.selected_tool
         
-        pickup_x, pickup_y = get_pocket_xy(self, rc_selected_pocket)
-        self.params["rc_do_rc_pickup"] = 1 if do_rc_pickup else 0
         self.params["rc_do_manual_pickup"] = 1 if do_manual_pickup else 0
-        self.params["rc_pickup_x"] = pickup_x
-        self.params["rc_pickup_y"] = pickup_y
+        self.params["rc_do_rc_pickup"] = 1 if do_rc_pickup else 0
+        
+        if do_rc_pickup:
+            pickup_x, pickup_y = get_pocket_xy(self, rc_selected_pocket)
+            self.params["rc_pickup_x"] = pickup_x
+            self.params["rc_pickup_y"] = pickup_y
 
         do_probe = self.selected_tool != 0
         self.params["rc_do_probe"] = 1 if do_probe else 0

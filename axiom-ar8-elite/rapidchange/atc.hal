@@ -11,6 +11,11 @@ net rapidchange-toolsetter      hm2_[MESA](BOARD).0.inmux.00.input-14-not
 #   net other-probe             or2.in1
 #   net any-probe               or2.out => motion.probe-input
 
+# Configure hal_manualtoolchange for manual tool changes
+loadusr -W hal_manualtoolchange
+net tool-change motion.digital-out-01 => hal_manualtoolchange.change
+net tool-changed motion.digital-in-01 <= hal_manualtoolchange.changed
+net tool-number iocontrol.0.tool-prep-number => hal_manualtoolchange.number
 
 # Loopback default tool change iocontrol
 net tool-prepare-loopback iocontrol.0.tool-prepare => iocontrol.0.tool-prepared

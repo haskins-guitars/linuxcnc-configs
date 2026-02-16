@@ -28,6 +28,11 @@ o<rapidchange_m6> sub
 
     ; Move to safe Z
     o115 if [#<rc_do_any_action> eq 1]
+        o116 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
+            ; Open dust cover
+            M64 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
+        o116 endif
+
         (print, Moving to safe Z)
         ; move to safe Z
         G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
@@ -40,8 +45,19 @@ o<rapidchange_m6> sub
         G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
         G53 G0 X[#<_ini[RAPIDCHANGEATC]MANUAL_CHANGE_X>] Y[#<_ini[RAPIDCHANGEATC]MANUAL_CHANGE_Y>]
 
+        ; Ensure tool changed is currently low
+        M66 L0 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
+        o121 if [#5399 ne 0]
+            (print, Failed! Tool changed DI hung high.)
+        o121 return [1]
+        o121 endif
+
         ; set DO to trigger hal_manualtoolchange
-        ; wait for DI from hal_manualtoolchange to continue
+        M64 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGE_DO>]
+        ; Wait for DI from hal_manualtoolchange to continue
+        M65 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
+        ; Clear DO to trigger hal_manualtoolchange
+        M65 L3 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGE_DO>]
     o120 endif
 
     ; Do RC tool drop
@@ -64,11 +80,23 @@ o<rapidchange_m6> sub
         ; move
         G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
         G53 G0 X[#<_ini[RAPIDCHANGEATC]MANUAL_CHANGE_X>] Y[#<_ini[RAPIDCHANGEATC]MANUAL_CHANGE_Y>]
+        
+        ; Ensure tool changed is currently low
+        M66 L0 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
+        o141 if [#5399 ne 0]
+            (print, Failed! Tool changed DI hung high.)
+        o141 return [1]
+        o141 endif
+
         ; set DO to trigger hal_manualtoolchange
-        ; wait for DI from hal_manualtoolchange to continue
+        M64 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGE_DO>]
+        ; Wait for DI from hal_manualtoolchange to continue
+        M65 L3 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
+        ; Clear DO to trigger hal_manualtoolchange
+        M65 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGE_DO>]
 
         ; Run builtin M6 to update tool data
-        m6 
+        M6
     o140 endif
 
     ; Do RC tool pickup
@@ -85,7 +113,7 @@ o<rapidchange_m6> sub
         o151 endif
 
         ; Run builtin M6 to update tool data
-        m6 
+        M6 
     o150 endif
 
     ; Probe new tool
@@ -101,6 +129,12 @@ o<rapidchange_m6> sub
         G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
         ; restore XY
         G53 G0 X[#<original_x>] Y[#<original_y>]
+
+        o116 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
+            ; Open dust cover
+            M65 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
+        o116 endif
+
         ; restore Z, WITHOUT G53
         G0 Z[#<original_z>]
     o170 endif
