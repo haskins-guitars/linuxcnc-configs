@@ -27,7 +27,7 @@ o<rapidchange_hammer> sub
         G53 G1 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_END>] F[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_FEED>] 
 
         ; Dwell to give time to thread on/off
-        G04 P1.0
+        G04 P0.5
         ; Stop spindle
         M5
         ; Dwell to allow spindle to stop

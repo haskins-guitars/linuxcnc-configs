@@ -80,12 +80,12 @@ def rapidchange_change_prolog(self, **words):
 
         # Get Px values from tool table for current and selected tools
         current_ret, rc_current_pocket = self.find_tool_pocket(self.current_tool)
-        if (current_ret != 0 and self.current_tool != 0):
+        if (current_ret != 0 and self.current_tool > 0):
             self.set_errormsg("Current tool, %i, not found in table" % self.current_tool)
             return INTERP_ERROR
         
         selected_ret, rc_selected_pocket = self.find_tool_pocket(self.selected_tool)
-        if (selected_ret != 0 and self.selected_tool != 0):
+        if (selected_ret != 0 and self.selected_tool > 0):
             self.set_errormsg("Selected tool, %i, not found in table" % self.selected_tool)
             return INTERP_ERROR
         

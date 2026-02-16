@@ -1,6 +1,6 @@
-net rapidchange-dust-cover      motion.digital-out-00   => hm2_[MESA](BOARD).0.ssr.00.out-06
-net rapidchange-ir              motion.digital-in-00    <= hm2_[MESA](BOARD).0.inmux.00.input-16
-net rapidchange-toolsetter      hm2_[MESA](BOARD).0.inmux.00.input-16
+net rapidchange-dust-cover      motion.digital-out-00   => hm2_[MESA](BOARD).0.ssr.00.out-05
+net rapidchange-ir              motion.digital-in-00    <= hm2_[MESA](BOARD).0.inmux.00.input-15
+net rapidchange-toolsetter      hm2_[MESA](BOARD).0.inmux.00.input-14-not
 
 # If no other probes
 #   net rapidchange-toolsetter motion.probe-input

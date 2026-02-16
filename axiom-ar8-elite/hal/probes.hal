@@ -3,8 +3,8 @@ net z-puck-in hm2_[MESA](BOARD).0.inmux.00.input-05
 
 # OR Z puck and RapidChange tool setter
 loadrt or2 names=probes
-addf or2 servo-thread
+addf probes servo-thread
 
-net rapidchange-toolsetter  or2.in0
-net z-puck-in               or2.in1
-net any-probe               or2.out => motion.probe-input
+net rapidchange-toolsetter  probes.in0
+net z-puck-in               probes.in1
+net any-probe               probes.out => motion.probe-input
