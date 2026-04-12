@@ -14,11 +14,11 @@ O<probe_z_puck> sub
     G0 Z[#<_ini[ZPUCK]LATCH_BACKOFF>] 
     
     ; Probe at latch speed/distance for more accurate reading
-    G38.2 Z[#<_ini[ZPUCK]LATCH_DISTANCE] F[#<_ini[ZPUCK]LATCH_FEED]
+    G38.2 Z[#<_ini[ZPUCK]LATCH_DISTANCE>] F[#<_ini[ZPUCK]LATCH_FEED>]
 
     ; Set current WCS Z value = plate thickness
-    G10 L20 P0 Z[#<_ini[ZPUCK]PUCK_THICKNESS]
+    G10 L20 P0 Z[#<_ini[ZPUCK]PUCK_THICKNESS>]
     
     ; Raise above workpiece
-    G0 Z[#<_ini[ZPUCK]FINAL_BACKOFF]        
+    G0 Z[#<_ini[ZPUCK]FINAL_BACKOFF>]
 O<probe_z_puck> endsub
