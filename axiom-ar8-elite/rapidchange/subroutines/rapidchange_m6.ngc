@@ -48,7 +48,7 @@ o<rapidchange_m6> sub
         ; Ensure tool changed is currently low
         M66 L0 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
         o121 if [#5399 ne 0]
-            (print, Failed! Tool changed DI hung high.)
+            (msg, Failed! Tool changed DI hung high.)
         o121 return [1]
         o121 endif
 
@@ -91,8 +91,9 @@ o<rapidchange_m6> sub
         o132 else
             M66 P[#<_ini[RAPIDCHANGEATC]IR_DI>] L0  ; Read IR sensor status
 
-            o133 if [#5399 eq 0]
-                (print, Unload FAILED! Tool still present)
+            o133 if [#5399 ne 0]
+                (msg, Unload FAILED! Tool still present)
+                G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
             o133 return [1] ; Fail M6
             o133 endif
         o132 endif
@@ -108,7 +109,7 @@ o<rapidchange_m6> sub
         ; Ensure tool changed is currently low
         M66 L0 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
         o141 if [#5399 ne 0]
-            (print, Failed! Tool changed DI hung high.)
+            (msg, Failed! Tool changed DI hung high.)
         o141 return [1]
         o141 endif
 
@@ -154,8 +155,9 @@ o<rapidchange_m6> sub
         o152 else
             M66 P[#<_ini[RAPIDCHANGEATC]IR_DI>] L0  ; Read IR sensor status
 
-            o153 if [#5399 eq 1]
-                (print, Load FAILED! Tool not present)
+            o153 if [#5399 ne 1]
+                (msg, Load FAILED! Tool not present)
+                G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
             o153 return [1] ; Fail M6
             o153 endif
         o152 endif
