@@ -11,6 +11,9 @@ class RapidChangeConfig:
         # Read RapidChange values from ini file once at startup
         self.inifile = linuxcnc.ini(os.environ['INI_FILE_NAME'])
 
+        self.FORCE_ALL_MANUAL_CHANGES = self.read_ini_value_bool("FORCE_ALL_MANUAL_CHANGES")
+        self.PROBE_AFTER_MANUAL_LOAD = self.read_ini_value_bool("PROBE_AFTER_MANUAL_LOAD")
+
         self.POCKET_BASE_X = self.read_ini_value("POCKET_BASE_X")
         self.POCKET_BASE_Y = self.read_ini_value("POCKET_BASE_Y")
         self.POCKET_OFFSET_X = self.read_ini_value("POCKET_OFFSET_X")
@@ -22,6 +25,16 @@ class RapidChangeConfig:
         if val is None:
             raise ValueError("Couldn't find RAPIDCHANGEATC.%s", key)
         return float(val)
+
+    def read_ini_value_bool(self, key):
+        val = self.read_ini_value(key)
+
+        if val == 0:
+            return False
+        elif val == 1:
+            return True
+        else:
+            raise ValueError("Value for key %s must be 0 or 1.", key)
 
 # Calculate X/Y position of given pocket
 def get_pocket_xy(self, pocket):
@@ -94,7 +107,8 @@ def rapidchange_change_prolog(self, **words):
 
         current_tool_in_rc = \
             rc_current_pocket > 0 \
-            and rc_current_pocket <= self.rapidchange.NUM_POCKETS
+            and rc_current_pocket <= self.rapidchange.NUM_POCKETS \
+            and not self.FORCE_ALL_MANUAL_CHANGES
         
         do_rc_drop = \
             self.current_tool > 0 \
@@ -117,32 +131,37 @@ def rapidchange_change_prolog(self, **words):
 
         selected_tool_in_rc = \
             rc_selected_pocket > 0 \
-            and rc_selected_pocket <= self.rapidchange.NUM_POCKETS
-        
+            and rc_selected_pocket <= self.rapidchange.NUM_POCKETS \
+            and not self.FORCE_ALL_MANUAL_CHANGES
+
         do_rc_pickup = \
             self.selected_tool > 0 \
             and selected_tool_in_rc \
             and self.current_tool != self.selected_tool
-        
+
         do_manual_pickup = \
             self.selected_tool > 0 \
             and not selected_tool_in_rc \
             and self.current_tool != self.selected_tool
-        
+
         self.params["rc_do_manual_pickup"] = 1 if do_manual_pickup else 0
         self.params["rc_do_rc_pickup"] = 1 if do_rc_pickup else 0
-        
+
         if do_rc_pickup:
             pickup_x, pickup_y = get_pocket_xy(self, rc_selected_pocket)
             self.params["rc_pickup_x"] = pickup_x
             self.params["rc_pickup_y"] = pickup_y
 
-        do_probe = self.selected_tool != 0
+        suppress_probe = do_manual_pickup and self.PROBE_AFTER_MANUAL_LOAD
+        do_pickup = do_rc_pickup or do_manual_pickup
+
+        do_probe = do_pickup and not suppress_probe
+
         self.params["rc_do_probe"] = 1 if do_probe else 0
 
         do_any_action = \
             do_rc_drop or do_manual_drop \
-            or do_rc_pickup or do_rc_pickup \
+            or do_rc_pickup or do_manual_pickup \
             or do_probe 
         
         self.params["rc_do_any_action"] = 1 if do_any_action else 0
