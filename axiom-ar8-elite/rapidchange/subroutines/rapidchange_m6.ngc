@@ -21,9 +21,9 @@ o<rapidchange_m6> sub
     G61 ; Use exact stop mode
     G90 ; Ensure everything that we do is done in absolute coordinates
 
-    ; Store original position to return to
-    #<original_x> = #<_x>
-    #<original_y> = #<_y>
+    ; Store original position to return to (These are in the current WCS)
+    #<original_abs_x> = #<_abs_x>
+    #<original_abs_y> = #<_abs_y>
     #<original_z> = #<_z>
 
     ; Move to safe Z
@@ -66,12 +66,35 @@ o<rapidchange_m6> sub
         ; move to rc_drop_x, rc_drop_y
         G53 G0 X[#<rc_drop_x>] Y[#<rc_drop_y>]
 
-        ; Attempt enagage, remove tool, 1 attempt
-        o<rapidchange_hammer> call [1] [#<_ini[RAPIDCHANGEATC]ENGAGE_UNLOAD_STRIKES>]
-        o131 if [#<_value> LE 0]
-            ; Drop failed
-        o131 return [0]
-        o131 endif
+        ; Spindle on
+        M4 S[#<_ini[RAPIDCHANGEATC]ENGAGE_UNLOAD_RPM>]
+        ; Move close to pocket
+        G53 G0 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_START>]
+
+        #<strikes_remaining> = #<_ini[RAPIDCHANGEATC]ENGAGE_UNLOAD_STRIKES>
+        o131 while [#<strikes_remaining> gt 0]
+            #<strikes_remaining> = [#<strikes_remaining> - 1]
+
+            ; Lower into pocket
+            G53 G1 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_END>] F[#<_ini[RAPIDCHANGEATC]ENGAGE_FEED>] 
+
+            ; Move to IR checking position
+            G53 G1 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_START>] F[#<_ini[RAPIDCHANGEATC]ENGAGE_FEED>]
+        o131 endwhile
+        
+        M5 ; Stop spindle
+        G04 P1  ; Dwell to allow spindle to stop
+
+        o132 if [#<_ini[RAPIDCHANGEATC]IR_DI> lt 0]
+            (print, Unload Success. No IR DI configured, assuming success.)
+        o132 else
+            M66 P[#<_ini[RAPIDCHANGEATC]IR_DI>] L0  ; Read IR sensor status
+
+            o133 if [#5399 eq 0]
+                (print, Unload FAILED! Tool still present)
+            o133 return [1] ; Fail M6
+            o133 endif
+        o132 endif
     o130 endif
 
     ; Do manual tool pickup
@@ -105,12 +128,36 @@ o<rapidchange_m6> sub
         ; move to rc_pickup_x, rc_pickup_y
         G53 G0 X[#<rc_pickup_x>] Y[#<rc_pickup_y>]
 
-        ; Attempt enagage, remove tool, 1 attempt
-        o<rapidchange_hammer> call [0] [#<_ini[RAPIDCHANGEATC]ENGAGE_LOAD_STRIKES>]
-        o151 if [#<_value> LE 0]
-            ; Pickup failed
-        o151 return [0]
-        o151 endif
+        ; Spindle on
+        M3 S[#<_ini[RAPIDCHANGEATC]ENGAGE_LOAD_RPM>]
+
+        ; Move close to pocket
+        G53 G0 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_START>]
+
+        #<strikes_remaining> = #<_ini[RAPIDCHANGEATC]ENGAGE_LOAD_STRIKES>
+        o131 while [#<strikes_remaining> gt 0]
+            #<strikes_remaining> = [#<strikes_remaining> - 1]
+
+            ; Lower into pocket
+            G53 G1 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_END>] F[#<_ini[RAPIDCHANGEATC]ENGAGE_FEED>] 
+
+            ; Move to IR checking position
+            G53 G1 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_START>] F[#<_ini[RAPIDCHANGEATC]ENGAGE_FEED>]
+        o131 endwhile
+        
+        M5 ; Stop spindle
+        G04 P1  ; Dwell to allow spindle to stop
+
+        o132 if [#<_ini[RAPIDCHANGEATC]IR_DI> lt 0]
+            (print, Load Success. No IR DI configured, assuming success.)
+        o132 else
+            M66 P[#<_ini[RAPIDCHANGEATC]IR_DI>] L0  ; Read IR sensor status
+
+            o133 if [#5399 eq 1]
+                (print, Load FAILED! Tool not present)
+            o133 return [1] ; Fail M6
+            o133 endif
+        o132 endif
 
         ; Run builtin M6 to update tool data
         M6 
@@ -127,15 +174,15 @@ o<rapidchange_m6> sub
         (print, Restoring original position)
         ; move to safe Z
         G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
-        ; restore XY, WITHOUT G53
-        G0 X[#<original_x>] Y[#<original_y>]
+        ; restore XY
+        G53 G0 X[#<original_abs_x>] Y[#<original_abs_y>]
 
         o171 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
             ; Open dust cover
             M65 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
         o171 endif
 
-        ; restore Z, WITHOUT G53
+        ; restore Z, WITHOUT G53 so it includes tool length
         G0 Z[#<original_z>]
     o170 endif
 
