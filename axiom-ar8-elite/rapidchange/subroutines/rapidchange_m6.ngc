@@ -66,10 +66,11 @@ o<rapidchange_m6> sub
         ; move to rc_drop_x, rc_drop_y
         G53 G0 X[#<rc_drop_x>] Y[#<rc_drop_y>]
 
-        ; Spindle on
-        M4 S[#<_ini[RAPIDCHANGEATC]ENGAGE_UNLOAD_RPM>]
         ; Move close to pocket
         G53 G0 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_START>]
+
+        ; Spindle on
+        M4 S[#<_ini[RAPIDCHANGEATC]ENGAGE_UNLOAD_RPM>]
 
         #<strikes_remaining> = #<_ini[RAPIDCHANGEATC]ENGAGE_UNLOAD_STRIKES>
         o131 while [#<strikes_remaining> gt 0]
@@ -128,14 +129,14 @@ o<rapidchange_m6> sub
         ; move to rc_pickup_x, rc_pickup_y
         G53 G0 X[#<rc_pickup_x>] Y[#<rc_pickup_y>]
 
-        ; Spindle on
-        M3 S[#<_ini[RAPIDCHANGEATC]ENGAGE_LOAD_RPM>]
-
         ; Move close to pocket
         G53 G0 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_START>]
 
+        ; Spindle on
+        M3 S[#<_ini[RAPIDCHANGEATC]ENGAGE_LOAD_RPM>]
+
         #<strikes_remaining> = #<_ini[RAPIDCHANGEATC]ENGAGE_LOAD_STRIKES>
-        o131 while [#<strikes_remaining> gt 0]
+        o151 while [#<strikes_remaining> gt 0]
             #<strikes_remaining> = [#<strikes_remaining> - 1]
 
             ; Lower into pocket
@@ -143,21 +144,21 @@ o<rapidchange_m6> sub
 
             ; Move to IR checking position
             G53 G1 Z[#<_ini[RAPIDCHANGEATC]ENGAGE_Z_START>] F[#<_ini[RAPIDCHANGEATC]ENGAGE_FEED>]
-        o131 endwhile
+        o151 endwhile
         
         M5 ; Stop spindle
         G04 P1  ; Dwell to allow spindle to stop
 
-        o132 if [#<_ini[RAPIDCHANGEATC]IR_DI> lt 0]
+        o152 if [#<_ini[RAPIDCHANGEATC]IR_DI> lt 0]
             (print, Load Success. No IR DI configured, assuming success.)
-        o132 else
+        o152 else
             M66 P[#<_ini[RAPIDCHANGEATC]IR_DI>] L0  ; Read IR sensor status
 
-            o133 if [#5399 eq 1]
+            o153 if [#5399 eq 1]
                 (print, Load FAILED! Tool not present)
-            o133 return [1] ; Fail M6
-            o133 endif
-        o132 endif
+            o153 return [1] ; Fail M6
+            o153 endif
+        o152 endif
 
         ; Run builtin M6 to update tool data
         M6 

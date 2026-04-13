@@ -108,7 +108,7 @@ def rapidchange_change_prolog(self, **words):
         current_tool_in_rc = \
             rc_current_pocket > 0 \
             and rc_current_pocket <= self.rapidchange.NUM_POCKETS \
-            and not self.FORCE_ALL_MANUAL_CHANGES
+            and not self.rapidchange.FORCE_ALL_MANUAL_CHANGES
         
         do_rc_drop = \
             self.current_tool > 0 \
@@ -132,7 +132,7 @@ def rapidchange_change_prolog(self, **words):
         selected_tool_in_rc = \
             rc_selected_pocket > 0 \
             and rc_selected_pocket <= self.rapidchange.NUM_POCKETS \
-            and not self.FORCE_ALL_MANUAL_CHANGES
+            and not self.rapidchange.FORCE_ALL_MANUAL_CHANGES
 
         do_rc_pickup = \
             self.selected_tool > 0 \
@@ -152,7 +152,7 @@ def rapidchange_change_prolog(self, **words):
             self.params["rc_pickup_x"] = pickup_x
             self.params["rc_pickup_y"] = pickup_y
 
-        suppress_probe = do_manual_pickup and self.PROBE_AFTER_MANUAL_LOAD
+        suppress_probe = do_manual_pickup and self.rapidchange.PROBE_AFTER_MANUAL_LOAD
         do_pickup = do_rc_pickup or do_manual_pickup
 
         do_probe = do_pickup and not suppress_probe
