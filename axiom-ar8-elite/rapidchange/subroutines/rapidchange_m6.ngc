@@ -109,7 +109,7 @@ o<rapidchange_m6> sub
         o<rapidchange_hammer> call [0] [#<_ini[RAPIDCHANGEATC]ENGAGE_LOAD_STRIKES>]
         o151 if [#<_value> LE 0]
             ; Pickup failed
-        0151 return [0]
+        o151 return [0]
         o151 endif
 
         ; Run builtin M6 to update tool data
@@ -127,13 +127,13 @@ o<rapidchange_m6> sub
         (print, Restoring original position)
         ; move to safe Z
         G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
-        ; restore XY
-        G53 G0 X[#<original_x>] Y[#<original_y>]
+        ; restore XY, WITHOUT G53
+        G0 X[#<original_x>] Y[#<original_y>]
 
-        o116 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
+        o171 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
             ; Open dust cover
             M65 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
-        o116 endif
+        o171 endif
 
         ; restore Z, WITHOUT G53
         G0 Z[#<original_z>]
