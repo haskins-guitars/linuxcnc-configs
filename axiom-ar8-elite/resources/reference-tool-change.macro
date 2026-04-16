@@ -1,0 +1,92 @@
+o1000 if [#<_selected_tool> LT 0]
+  (debug, Selected Tool: #<_selected_tool> is out of range. Tool change aborted. Program paused.)
+  M0
+  M99
+o1000 elseif [#<_selected_tool> EQ #<_current_tool>]
+  (debug, Current tool selected. Tool change bypassed.)
+  M99
+o1000 endif
+#<rc_is_manual_unload> = 0
+#<rc_is_manual_load> = 0
+M5
+o2000 if [#<_metric> EQ 0]
+  #<_rc_return_units> = 20
+o2000 else
+  #<_rc_return_units> = 21
+o2000 endif
+G21 G90
+G53 G90 G0 Z0.000
+G43.1 Z0
+G4 P0.05
+#<z_offset> = [0.000 - #5422]
+o3000 if [#<_current_tool> EQ 0]
+o3000 elseif [#<_current_tool> EQ 98]
+o3000 elseif [#<rc_is_manual_unload> EQ 1]
+  G53 G90 G0 Z0.000
+  G53 G90 G0 X100.000 Y100.000
+  o3100 if [#<rc_is_manual_load> EQ 1]
+    (debug, Tool #<_current_tool> and tool #<_selected_tool> are manual tools. Manually unload tool #<_current_tool> and load tool #<_selected_tool>. Then unlock to continue.)
+  o3100 elseif [#<_selected_tool> EQ 0]
+    (debug, Tool #<_current_tool> is a manual tool. Manually unload tool #<_current_tool> and unlock to continue.)
+  o3100 else
+    (debug, Tool #<_current_tool> is a manual tool. Manually unload tool #<_current_tool> and ensure tool #<_selected_tool> is in the Solo for loading. Then unlock to continue.)
+  o3100 endif
+  M0
+o3000 else
+  ; Normal unload
+  G53 G90 G0 X64.000 Y35.500
+  G53 G90 G0 Z-86.000
+  M4 S1800.0
+  G4 P1
+  G53 G90 G1 Z-109.000 F2000.0
+  G53 G90 G1 Z-92.000 F2000.0
+  M5
+  G53 G90 G0 Z0.000
+  o3200 if [#<rc_is_manual_load> EQ 0]
+    o3210 if [#<_selected_tool> GT 0]
+      (debug, Replace unloaded tool #<_current_tool> with tool #<_selected_tool> for loading and press unlock to continue.)
+      M0
+    o3210 endif
+  o3200 endif
+o3000 endif
+o4000 if [#<_selected_tool> EQ 0]
+  G53 G90 G0 Z0.000
+o4000 elseif [#<_selected_tool> EQ 98]
+  G53 G90 G0 Z0.000
+o4000 elseif [[#<rc_is_manual_load> EQ 1] AND [#<rc_is_manual_unload> EQ 1]]
+  G53 G90 G0 Z0.000
+o4000 elseif [[#<rc_is_manual_load> EQ 1] AND [#<rc_is_manual_unload> EQ 0]]
+  G53 G90 G0 Z0.000
+  G53 G90 G0 X100.000 Y100.000
+  o4100 if [[#<rc_is_manual_unload> EQ 0] AND [#<_current_tool> GT 0]]
+    (debug, Tool #<_selected_tool> is out of range. Ensure tool #<_current_tool> unloaded properly and manually load tool #<_selected_tool>. Then unlock to continue.)
+  o4100 else
+    (debug, Tool #<_selected_tool> is out of range. Manually load tool #<_selected_tool> and unlock to continue.)
+  o4100 endif
+  M0
+o4000 else
+  G53 G90 G0 X64.000 Y35.500
+  G53 G90 G0 Z-86.000
+  M3 S1700.0
+  G4 P1
+  G53 G90 G1 Z-109.000 F2000.0
+  G53 G90 G1 Z-92.000 F2000.0
+  G53 G90 G1 Z-109.000 F2000.0
+  G53 G90 G1 Z-92.000 F2000.0
+  M5
+  G53 G90 G0 Z0.000
+  (debug, Confirm tool #<_selected_tool> loaded properly and unlock to continue.)
+  M0
+o4000 endif
+M61 Q[#<_selected_tool>]
+o5000 if [[#<_current_tool> GT 0] AND [#<_current_tool> NE 98]]
+  G53 G90 G0 X4.000 Y35.500
+  G53 G90 G0 Z0.000
+  G43.1 Z0
+  G38.2 G91 Z-80.000 F200.0
+  G38.4 G91 Z10.000 F50.0
+  G4 P0.05
+  G43.1 Z[#5063 + #<z_offset>]
+o5000 endif
+G53 G90 G0 Z0.000
+G[#<_rc_return_units>]
