@@ -14,6 +14,9 @@ o<rapidchange_probe> sub
         g20
     o110 endif
 
+    G61 ; Use exact stop mode
+    G90 ; Ensure everything that we do is done in absolute coordinates
+
     (print, Probing tool length)
 
     G49 ; Clear existing tool length
@@ -35,22 +38,23 @@ o<rapidchange_probe> sub
     G4 P0.5
     
     ; Probe at latch speed/distance for more accurate reading
-    G38.2 Z[#<_ini[RAPIDCHANGEATC]TOOLSET_LATCH_DISTANCE] F[#<_ini[RAPIDCHANGEATC]TOOLSET_LATCH_FEED]
+    G38.2 Z[#<_ini[RAPIDCHANGEATC]TOOLSET_LATCH_DISTANCE>] F[#<_ini[RAPIDCHANGEATC]TOOLSET_LATCH_FEED>]
 
     ; Calculate tool length
     ; Find Z offset of current WCS (#5220), for example #5223 stores WCS1 Z offset
     #<wcs_z_offset> = #[5203 + #5220 * 20]
     ; Combined G92 and G52 offsets(#5213) if enabled (#5210 = 1)
     #<corordinate_z_offset> = [#5213 * #5210]
-    #<total_z_offset> = [#<wcs_z_offset> + #<corordinate_z_offset> + #<_hal[RAPIDCHANGEATC]TOOLSET_HEIGHT>]
+    #<total_z_offset> = [#<wcs_z_offset> + #<corordinate_z_offset> + #<_ini[RAPIDCHANGEATC]TOOLSET_HEIGHT>]
     
-    (print, wcs_z_offset=#<wcs_z_offset>, corordinate_z_offset=#<corordinate_z_offset>, TOOLSET_HEIGHT=#<_hal[RAPIDCHANGEATC]TOOLSET_HEIGHT>, total_z_offset=#<total_z_offset>)
+    (print, wcs_z_offset=#<wcs_z_offset>, corordinate_z_offset=#<corordinate_z_offset>, TOOLSET_HEIGHT=#<_ini[RAPIDCHANGEATC]TOOLSET_HEIGHT>, total_z_offset=#<total_z_offset>)
     
-    (print, Saving tool length)
-    G10 L1 P#<current_tool> Z#<total_z_offset> 
+    (print, Saving tool #<_current_tool> length)
+    G10 L1 P#<_current_tool> Z#<total_z_offset> 
     ; enable tool length compenstation
     G43
 
+    G90 ; Set absolute coordinates
     ; Move to safe Z
     G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
 o<rapidchange_probe> endsub [1]
