@@ -6,57 +6,55 @@ o<rapidchange_probe> sub
     O100     return [999]
     O100 endif
 
-    M73 ; Save and autorestore modal states
-
-    o110 if [#<_metric_machine>]
-        g21
-    o110 else if [#<_imperial> EQ 0]
-        g20
-    o110 endif
-
-    G61 ; Use exact stop mode
-    G90 ; Ensure everything that we do is done in absolute coordinates
-
     (print, Probing tool length)
 
+    M70 ; Save modal states
+    G21 ; Millimeters
     G49 ; Clear existing tool length
 
-    ; Move to safe Z
-    G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
+    G90 ; Move to pocket position in absolute
+    G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>] ; Move to safe Z
 
     ; Move to tool setter XY
     G53 G0 X[#<_ini[RAPIDCHANGEATC]TOOLSET_X>] Y[#<_ini[RAPIDCHANGEATC]TOOLSET_Y>]
 
-    G91 ; Set incremental
+    G91 ; Probes have to be done in incremental mode
 
     ; Probe down using a fast feedrate
     G38.2 Z[#<_ini[RAPIDCHANGEATC]TOOLSET_SEARCH_DISTANCE>] F[#<_ini[RAPIDCHANGEATC]TOOLSET_SEARCH_FEED>]
 
-    ; Move up to latch distance
+    ; Move up before latch probe
     G0 Z[#<_ini[RAPIDCHANGEATC]TOOLSET_LATCH_BACKOFF>] 
     ; Allow a half second for the probe input to clear
     G4 P0.5
-    
     ; Probe at latch speed/distance for more accurate reading
     G38.2 Z[#<_ini[RAPIDCHANGEATC]TOOLSET_LATCH_DISTANCE>] F[#<_ini[RAPIDCHANGEATC]TOOLSET_LATCH_FEED>]
 
-    ; Calculate tool length
-    ; Find Z offset of current WCS (#5220), for example #5223 stores WCS1 Z offset
-    #<wcs_z_offset> = #[5203 + #5220 * 20]
-    ; Combined G92 and G52 offsets(#5213) if enabled (#5210 = 1)
-    #<corordinate_z_offset> = [#5213 * #5210]
-    #<total_z_offset> = [#<wcs_z_offset> + #<corordinate_z_offset> + #<_ini[RAPIDCHANGEATC]TOOLSET_HEIGHT>]
-    
-    (print, wcs_z_offset=#<wcs_z_offset>, corordinate_z_offset=#<corordinate_z_offset>, TOOLSET_HEIGHT=#<_ini[RAPIDCHANGEATC]TOOLSET_HEIGHT>, total_z_offset=#<total_z_offset>)
-    
-    (print, Saving tool #<_current_tool> length)
-    G10 L1 P#<_current_tool> Z#<total_z_offset> 
-    ; enable tool length compenstation
-    G43
-
     G90 ; Set absolute coordinates
-    ; Move to safe Z
-    G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
+    G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>] ; Move to safe Z
+
+    ; Calculate tool length
+
+    ; Position probe triggered
+    #<probe_triggered_z> = #5063
+    ; Find Z offset of current WCS (#5220), for example #5223 stores WCS1 Z offset
+    #<wcs_z> = [5203 + #5220 * 20]
+    ; Combined G92 and G52 offsets(#5213) if enabled (#5210 = 1)
+    #<coordinate_offset_z> = [#5213 * #5210]
+    #<tool_length> = [#<probe_triggered_z> - #<_ini[RAPIDCHANGEATC]TOOLSET_HEIGHT>]
+    
+    (print, Saving tool length)
+    (print, _current_tool=#<_current_tool>)
+    (print, probe_triggered_z=#<probe_triggered_z>)
+    (print, coordinate_offset_z=#<coordinate_offset_z>)
+    (print, [RAPIDCHANGEATC]TOOLSET_HEIGHT=#<_ini[RAPIDCHANGEATC]TOOLSET_HEIGHT>)
+    (print, tool_length=#<tool_length>)
+    
+    G10 L1 P#<_current_tool> Z#<tool_length> 
+
+    M72 ; Restore modal state before G43 or it won't apply after returning
+
+    G43 ; Enable tool length compenstation
 o<rapidchange_probe> endsub [1]
 
 M2
