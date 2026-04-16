@@ -30,7 +30,7 @@ o<rapidchange_m6> sub
     o115 if [#<rc_do_any_action> eq 1]
         o116 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
             ; Open dust cover
-            M64 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
+            M62 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
         o116 endif
 
         (print, Moving to safe Z)
@@ -181,8 +181,8 @@ o<rapidchange_m6> sub
         G53 G0 X[#<original_abs_x>] Y[#<original_abs_y>]
 
         o171 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
-            ; Open dust cover
-            M65 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
+            ; Close dust cover
+            M63 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
         o171 endif
 
         ; restore Z, WITHOUT G53 so it includes tool length
