@@ -2,10 +2,12 @@
 
 O<probe_z_puck> sub
     M73 ; Save and autorestore modal states
-    G92.1 ; Cancel all G92 offsets
-    ; G49 ; Cancel G43 tool length offsets
-    ; G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>] ; Clear WCS Z offset
-    G91 (Set incremental mode)
+    
+    G49 ; Disable tool length offsets
+    G21 ; Millimeters
+    G10 L2 P0 Z0 ; Clear WCS Z offset
+
+    G91 ; Incremental mode
     
     ; Probe down using a fast feedrate
     G38.2 Z[#<_ini[ZPUCK]SEARCH_DISTANCE>] F[#<_ini[ZPUCK]SEARCH_FEED>]
@@ -15,10 +17,21 @@ O<probe_z_puck> sub
     
     ; Probe at latch speed/distance for more accurate reading
     G38.2 Z[#<_ini[ZPUCK]LATCH_DISTANCE>] F[#<_ini[ZPUCK]LATCH_FEED>]
-
-    ; Set current WCS Z value = plate thickness
-    G10 L20 P0 Z[#<_ini[ZPUCK]PUCK_THICKNESS>]
     
     ; Raise above workpiece
     G0 Z[#<_ini[ZPUCK]FINAL_BACKOFF>]
-O<probe_z_puck> endsub
+
+    ; Position probe triggered
+    #<probe_triggered_z> = #5063
+    ; Combined G92 and G52 offsets(#5213) if enabled (#5210 = 1)
+    #<corordinate_offset_z> = [#5213 * #5210]
+    ; Calculated WCS Z offset
+    #<wcs_z> = [#<probe_triggered_z> - #<_ini[ZPUCK]PUCK_THICKNESS> - #<corordinate_offset_z>]
+
+    (print, probe_triggered_z=#<probe_triggered_z>)
+    (print, corordinate_offset_z=#<corordinate_offset_z>)
+    (print, [ZPUCK]PUCK_THICKNESS=#<_ini[ZPUCK]PUCK_THICKNESS>)
+    (print, wcs_z=#<wcs_z>)
+    
+    G10 L2 P0 Z#<wcs_z>
+O<probe_z_puck> endsub [1]
