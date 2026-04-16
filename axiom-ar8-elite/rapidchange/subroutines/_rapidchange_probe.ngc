@@ -1,5 +1,6 @@
 ; Probe tool length using RapidChange tool setter
-o<rapidchange_probe> sub
+; Must be called form something that manages dust cover opening/closing
+o<_rapidchange_probe> sub
     ; Don't execute in UI preview
     O100 if [#<_task> EQ 0]
         (print, Skipping in preview)
@@ -55,6 +56,6 @@ o<rapidchange_probe> sub
     M72 ; Restore modal state before G43 or it won't apply after returning
 
     G43 ; Enable tool length compenstation
-o<rapidchange_probe> endsub [1]
+o<_rapidchange_probe> endsub [1]
 
 M2

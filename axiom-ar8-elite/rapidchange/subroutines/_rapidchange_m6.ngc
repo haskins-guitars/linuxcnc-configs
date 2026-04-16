@@ -1,6 +1,6 @@
 ; Remapped M6 behavior for RapidChange ATC
 ; Must use rapidchange_change_prolog which calculates pocket positions and determines which steps to execute.
-o<rapidchange_m6> sub
+o<_rapidchange_m6> sub
     ; Don't execute in UI preview
     O100 if [#<_task> EQ 0]
         (print, Skipping in preview)
@@ -14,7 +14,6 @@ o<rapidchange_m6> sub
     (print, rc_current_pocket= #<rc_current_pocket>, rc_selected_pocket = #<rc_selected_pocket>)
     (print, tool_in_spindle = #<tool_in_spindle>, selected_tool = #<selected_tool>)
 
-    G61 ; Use exact stop mode
     G90 ; Ensure everything that we do is done in absolute coordinates
 
     ; Store original position to return to (These are in the current WCS)
@@ -166,14 +165,15 @@ o<rapidchange_m6> sub
     o160 if [#<rc_do_probe> EQ 2]
         (print, Probing)
         G49 ; clear current tool offset
+        ; o<_rapidchange_probe> call
     o160 endif
 
     ; Return to original position
     o170 if [#<rc_do_any_action> EQ 1]
         (print, Restoring original position)
-        ; move to safe Z
+        ; Move to safe Z
         G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
-        ; restore XY
+        ; Restore XY
         G53 G0 X[#<original_abs_x>] Y[#<original_abs_y>]
 
         o171 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
@@ -181,11 +181,11 @@ o<rapidchange_m6> sub
             M63 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
         o171 endif
 
-        ; restore Z, WITHOUT G53 so it includes tool length
+        ; Restore Z, WITHOUT G53 so it includes tool length
         G0 Z[#<original_z>]
     o170 endif
 
     (print, End of Tool Change Program)
-o<rapidchange_m6> endsub [1]
+o<_rapidchange_m6> endsub [1]
 
 M2
