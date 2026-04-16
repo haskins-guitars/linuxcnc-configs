@@ -3,7 +3,6 @@
 O<probe_z_puck> sub
     M73 ; Save and autorestore modal states
     
-    G49 ; Disable tool length offsets
     G21 ; Millimeters
     G10 L2 P0 Z0 ; Clear WCS Z offset
 
@@ -21,15 +20,16 @@ O<probe_z_puck> sub
     ; Raise above workpiece
     G0 Z[#<_ini[ZPUCK]FINAL_BACKOFF>]
 
-    ; Position probe triggered
     #<probe_triggered_z> = #5063
     ; Combined G92 and G52 offsets(#5213) if enabled (#5210 = 1)
     #<corordinate_offset_z> = [#5213 * #5210]
+    #<current_tool_offset_z> = #5403
     ; Calculated WCS Z offset
-    #<wcs_z> = [#<probe_triggered_z> - #<_ini[ZPUCK]PUCK_THICKNESS> - #<corordinate_offset_z>]
+    #<wcs_z> = [#<probe_triggered_z> - #<corordinate_offset_z> - #<current_tool_offset_z> - #<_ini[ZPUCK]PUCK_THICKNESS>]
 
     (print, probe_triggered_z=#<probe_triggered_z>)
     (print, corordinate_offset_z=#<corordinate_offset_z>)
+    (print, current_tool_offset_z=#<current_tool_offset_z>)
     (print, [ZPUCK]PUCK_THICKNESS=#<_ini[ZPUCK]PUCK_THICKNESS>)
     (print, wcs_z=#<wcs_z>)
     
