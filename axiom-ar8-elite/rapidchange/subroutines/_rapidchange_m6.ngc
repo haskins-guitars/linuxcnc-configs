@@ -7,6 +7,7 @@ o<_rapidchange_m6> sub
     O100     return [999]
     O100 endif
 
+    M5 ; Stop spindle
     m73 ; Save and autorestore modal states
 
     G21 ; Set millimeters

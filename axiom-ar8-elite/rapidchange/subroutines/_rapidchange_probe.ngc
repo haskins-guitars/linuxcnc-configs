@@ -39,15 +39,16 @@ o<_rapidchange_probe> sub
     ; Position probe triggered
     #<probe_triggered_z> = #5063
     ; Find Z offset of current WCS (#5220), for example #5223 stores WCS1 Z offset
-    #<wcs_z> = [5203 + #5220 * 20]
+    #<wcs_z> = [#[5203 + #5220 * 20]]
     ; Combined G92 and G52 offsets(#5213) if enabled (#5210 = 1)
     #<coordinate_offset_z> = [#5213 * #5210]
-    #<tool_length> = [#<probe_triggered_z> - #<_ini[RAPIDCHANGEATC]TOOLSET_HEIGHT>]
+    #<tool_length> = [#<probe_triggered_z> - #<_ini[RAPIDCHANGEATC]TOOLSET_HEIGHT> + #<wcs_z>]
     
     (print, Saving tool length)
     (print, _current_tool=#<_current_tool>)
     (print, probe_triggered_z=#<probe_triggered_z>)
     (print, coordinate_offset_z=#<coordinate_offset_z>)
+    (print, wcs_z=#<wcs_z>)
     (print, [RAPIDCHANGEATC]TOOLSET_HEIGHT=#<_ini[RAPIDCHANGEATC]TOOLSET_HEIGHT>)
     (print, tool_length=#<tool_length>)
     
