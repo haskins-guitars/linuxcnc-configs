@@ -25,7 +25,7 @@ o<_rapidchange_m6> sub
     o115 if [#<rc_do_any_action> eq 1]
         o116 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
             ; Open dust cover
-            M62 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
+            M64 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
         o116 endif
 
         (print, Moving to safe Z)
@@ -53,6 +53,8 @@ o<_rapidchange_m6> sub
         M65 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
         ; Clear DO to trigger hal_manualtoolchange
         M65 L3 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGE_DO>]
+
+        G49 ; clear current tool offset
     o120 endif
 
     ; Do RC tool drop
@@ -92,6 +94,8 @@ o<_rapidchange_m6> sub
             o133 return [1] ; Fail M6
             o133 endif
         o132 endif
+
+        G49 ; clear current tool offset
     o130 endif
 
     ; Do manual tool pickup
@@ -114,7 +118,7 @@ o<_rapidchange_m6> sub
         M65 L3 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
         ; Clear DO to trigger hal_manualtoolchange
         M65 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGE_DO>]
-
+        
         ; Run builtin M6 to update tool data
         M6
     o140 endif
@@ -162,10 +166,15 @@ o<_rapidchange_m6> sub
     o150 endif
 
     ; Probe new tool
-    o160 if [#<rc_do_probe> EQ 2]
+    o160 if [#<rc_do_probe> EQ 1]
         (print, Probing)
-        G49 ; clear current tool offset
-        ; o<_rapidchange_probe> call
+        
+        m72 ; restore modal states. We want g43 to remain applied
+
+        ; G49 ; clear current tool offset
+        o<_rapidchange_probe> call
+
+        m73 ; save modal states
     o160 endif
 
     ; Return to original position
@@ -178,7 +187,7 @@ o<_rapidchange_m6> sub
 
         o171 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
             ; Close dust cover
-            M63 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
+            M65 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
         o171 endif
 
         ; Restore Z, WITHOUT G53 so it includes tool length

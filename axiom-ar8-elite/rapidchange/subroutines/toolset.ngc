@@ -8,14 +8,14 @@ o<toolset> sub
     
     o116 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
         ; Open dust cover
-        M62 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
+        M64 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
     o116 endif
 
     o<_rapidchange_probe> call
 
     o171 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
         ; Close dust cover
-        M63 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
+        M65 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
     o171 endif
 o<toolset> endsub [1]
 
