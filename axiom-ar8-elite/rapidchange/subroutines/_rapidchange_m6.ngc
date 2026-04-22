@@ -15,6 +15,7 @@ o<_rapidchange_m6> sub
     (print, tool_in_spindle = #<tool_in_spindle>, selected_tool = #<selected_tool>)
 
     G90 ; Ensure everything that we do is done in absolute coordinates
+    G61 ; Exact Stop Mode, disables path blending
 
     ; Store original position to return to (These are in the current WCS)
     #<original_abs_x> = #<_abs_x>
@@ -44,7 +45,7 @@ o<_rapidchange_m6> sub
         M66 L0 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
         o121 if [#5399 ne 0]
             (msg, Failed! Tool changed DI hung high.)
-        o121 return [1]
+        o121 return [-1]
         o121 endif
 
         ; set DO to trigger hal_manualtoolchange
@@ -89,7 +90,7 @@ o<_rapidchange_m6> sub
             o133 if [#5399 ne 0]
                 (msg, Unload FAILED! Tool still present)
                 G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
-            o133 return [1] ; Fail M6
+            o133 return [-2] ; Fail M6
             o133 endif
         o132 endif
     o130 endif
@@ -105,7 +106,7 @@ o<_rapidchange_m6> sub
         M66 L0 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
         o141 if [#5399 ne 0]
             (msg, Failed! Tool changed DI hung high.)
-        o141 return [1]
+        o141 return [-3]
         o141 endif
 
         ; set DO to trigger hal_manualtoolchange
@@ -153,7 +154,7 @@ o<_rapidchange_m6> sub
             o153 if [#5399 ne 1]
                 (msg, Load FAILED! Tool not present)
                 G53 G0 Z[#<_ini[RAPIDCHANGEATC]SAFE_Z>]
-            o153 return [1] ; Fail M6
+            o153 return [-4] ; Fail M6
             o153 endif
         o152 endif
 
