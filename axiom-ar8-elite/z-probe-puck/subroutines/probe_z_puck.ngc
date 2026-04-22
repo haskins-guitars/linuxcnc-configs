@@ -25,7 +25,7 @@ O<probe_z_puck> sub
     #<corordinate_offset_z> = [#5213 * #5210]
     #<current_tool_offset_z> = #5403
     ; Calculated WCS Z offset
-    #<wcs_z> = [#<probe_triggered_z> - #<corordinate_offset_z> - #<current_tool_offset_z> - #<_ini[ZPUCK]PUCK_THICKNESS>]
+    #<wcs_z> = [#<probe_triggered_z> - #<corordinate_offset_z> - #<_ini[ZPUCK]PUCK_THICKNESS>]
 
     (print, probe_triggered_z=#<probe_triggered_z>)
     (print, corordinate_offset_z=#<corordinate_offset_z>)
