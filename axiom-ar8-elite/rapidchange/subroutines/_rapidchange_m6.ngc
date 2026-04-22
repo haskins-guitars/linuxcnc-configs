@@ -7,6 +7,11 @@ o<_rapidchange_m6> sub
     O100     return [999]
     O100 endif
 
+    o101 if [#<_spindle_on> eq 1]
+        (abort, Spindle must be stopped before M6)
+    o101 return [-100]
+    o101 endif
+
     m73 ; Save and autorestore modal states
 
     G21 ; Set millimeters

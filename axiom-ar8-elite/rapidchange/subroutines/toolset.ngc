@@ -5,6 +5,11 @@ o<toolset> sub
         (print, Skipping in preview)
     O100     return [999]
     O100 endif
+
+    o101 if [#<_spindle_on> eq 1]
+        (abort, Spindle must be stopped before o<toolset> call)
+    o101 return [-100]
+    o101 endif
     
     o116 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
         ; Open dust cover
