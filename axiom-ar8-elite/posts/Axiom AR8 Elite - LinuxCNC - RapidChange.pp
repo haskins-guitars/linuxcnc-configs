@@ -61,7 +61,7 @@ begin HEADER
 "([TOOLPATHS_OUTPUT])"
 "(Tools used in this file: )"
 "([TOOLS_USED])"
-"[N] G0 G21 G17 G90 G40 G49 G80 G94"
+"[N] G0 G21 G17 G90 G40 G80 G94"
 "[N] G64 P0.01"
 
 "[N] G0 [ZH]"
@@ -70,8 +70,8 @@ begin HEADER
 "[N] ([TOOLNAME])"
 "[N] G43H[T]"
 
-"[N] G0 [ZH]"
 "[N] G0 [XH] [YH] [F]"
+"[N] G0 [ZH]"
 
 "[N] [S] M03"
 "([TOOLPATH_NAME])"
