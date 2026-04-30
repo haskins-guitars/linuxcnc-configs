@@ -64,14 +64,14 @@ begin HEADER
 "[N] G0 G21 G17 G90 G40 G80 G94"
 "[N] G64 P0.01"
 
+"[N] G53 G0 Z194"
+"[N] G0 [XH] [YH] [F]"
 "[N] G0 [ZH]"
+
 "[N] M5"
 "[N] T[T] M6"
 "[N] ([TOOLNAME])"
 "[N] G43H[T]"
-
-"[N] G0 [XH] [YH] [F]"
-"[N] G0 [ZH]"
 
 "[N] [S] M03"
 "([TOOLPATH_NAME])"
@@ -242,6 +242,7 @@ begin FOOTER
 
 "[N] G0 [ZH]"
 "[N] G0 [XH] [YH]"
+"[N] G53 G0 Z194"
 "[N] M09"
 "[N] M30"
 %
