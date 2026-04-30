@@ -2,6 +2,8 @@
 
 Documentation for conversion from RichAuto B5x controller to LinuxCNC using a Mesa 7i95T IO board.
 
+[Video documenting conversion](https://youtu.be/JOLavSa7IXM)
+
 ## Installation
 
 - Clone to `~/linuxcnc/configs/axiom`
@@ -21,10 +23,10 @@ Outputs
 
 0. Servo Enable
 1. Servo Clear Alarm
-2. ATC Cover (future)
+2. Unused
 3. Unused
 4. Unused
-5. Unused
+5. RapidChange Dust Cover
 
 Inputs
 
@@ -36,14 +38,14 @@ Inputs
 5. Tool Setter (Puck)
 6. A Home
 7. E-Stop
-8. Tool setter (ATC) (future)
-9. ATC (future)
+8. Unused
+9. Unused
 10. Unused
 11. Unused
 12. Unused
 13. Unused
-14. Unused
-15. Unused
+14. IR Beam (RapidChange)
+15. Tool setter (RapidChange)
 16. Servo X - Alarm
 17. Unused
 18. Servo Y - Alarm
@@ -68,9 +70,9 @@ Step/Dir
 
 ## Servo Harness
 
-Two CAT 6 cables wired to servo connect at one end, ferruls at the other.
+Two CAT 6 cables wired to servo connector at one end, ferruls at the other.
 
-Solid = positive, white = negative in differential pairs
+In differential pairs, solid = positive, white = negative
 
 | Cable | Color                 | Signal               | Servo `func (pin)`     | Mesa           |
 | ----- | --------------------- | -------------------- | ---------------------- | -------------- |
