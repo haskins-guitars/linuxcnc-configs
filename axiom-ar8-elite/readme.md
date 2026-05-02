@@ -17,6 +17,17 @@ Documentation for conversion from RichAuto B5x controller to LinuxCNC using a Me
 - TEST: Servo alarm reset
 - Use servo encoder feedback to do something other than warn on excess error.
 
+## Machine Data
+
+- Spindle 
+  - 2.2kw Liquid Cooled
+  - Drive, Delta MS300
+- Z Axis
+  - 1:1 belt drive
+- X/Y/Z Axes
+  - Motor, Shihlin SME-L02030SAB 200W AC Servo
+  - Drive, Shihlin SDE-020A2-P 200W AC Servo Drive
+
 ## MESA I/O
 
 Outputs
