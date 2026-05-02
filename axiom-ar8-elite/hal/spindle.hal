@@ -66,4 +66,4 @@ setp spindle-pump-delay.off-delay 60
 
 net spindle-run => spindle-pump-delay.in
 
-net spindle-coolant-pump spindle-pump-delay.out => hm2_[MESA](BOARD).0.ssr.00.out-05
+net spindle-coolant-pump spindle-pump-delay.out => hm2_[MESA](BOARD).0.ssr.00.out-04
