@@ -53,3 +53,17 @@ net spindle-command => spindle-speed-near-target.in1
 net spindle-estimated-speed => spindle-speed-near-target.in2
 
 net spindle-at-speed spindle.0.at-speed <= spindle-speed-near-target.out
+
+# Spindle Coolant Pump (water cooled spindle pump)
+#######################################
+
+# Setup timedelay to leave coolant pump running 60 seconds after spindle stops
+loadrt timedelay names=spindle-pump-delay
+addf spindle-pump-delay servo-thread
+
+setp spindle-pump-delay.on-delay 0
+setp spindle-pump-delay.off-delay 60
+
+net spindle-run => spindle-pump-delay.in
+
+net spindle-coolant-pump spindle-pump-delay.out => hm2_[MESA](BOARD).0.ssr.00.out-05
