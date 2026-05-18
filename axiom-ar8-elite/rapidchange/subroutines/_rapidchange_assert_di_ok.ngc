@@ -1,0 +1,26 @@
+; Assert IR_DI and TOOLSETTER_DI states are nominal
+o<_rapidchange_assert_di_ok> sub
+    o100 if [#<_ini[RAPIDCHANGEATC]IR_DI> lt 0]
+        (print, No IR_DI configured, assuming ok.)
+    o100 else
+        M66 P[#<_ini[RAPIDCHANGEATC]IR_DI>] L0 ; Read DI
+
+        o110 if [#5399 ne 0]
+            (msg, Unexpected IR sensor state.)
+        o110 return [-110] ; Fail
+        o110 endif
+    o100 endif
+
+    o200 if [#<_ini[RAPIDCHANGEATC]TOOLSETTER_DI> lt 0]
+        (print, No TOOLSETTER_DI configured, assuming ok.)
+    o200 else
+        M66 P[#<_ini[RAPIDCHANGEATC]TOOLSETTER_DI>] L0 ; Read DI
+
+        o210 if [#5399 ne 0]
+            (msg, Unexpected toolsetter input state.)
+        o210 return [-210] ; Fail
+        o210 endif
+    o200 endif
+o<_rapidchange_assert_di_ok> endsub [1]
+
+M2

@@ -6,6 +6,9 @@ o<toolset> sub
     o100     return [999]
     o100 endif
 
+    # Check DIs are in nominal states
+    o<_rapidchange_assert_di_ok> call
+
     o101 if [#<_spindle_on> eq 1]
         (abort, Spindle must be stopped before o<toolset> call)
     o101 return [-101]

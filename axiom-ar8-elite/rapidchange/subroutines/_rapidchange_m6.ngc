@@ -29,6 +29,9 @@ o<_rapidchange_m6> sub
 
     ; Move to safe Z
     o115 if [#<rc_do_any_action> eq 1]
+        # Check DIs are in nominal states
+        o<_rapidchange_assert_di_ok> call
+
         o116 if [#<_ini[RAPIDCHANGEATC]COVER_DO> ge 0]
             ; Open dust cover
             M64 P[#<_ini[RAPIDCHANGEATC]COVER_DO>]
