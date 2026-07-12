@@ -58,10 +58,16 @@ o<_rapidchange_m6> sub
 
         ; set DO to trigger hal_manualtoolchange
         M64 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGE_DO>]
+
         ; Wait for DI from hal_manualtoolchange to continue
-        M65 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
-        ; Clear DO to trigger hal_manualtoolchange
-        M65 L3 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGE_DO>]
+        M66 L1 Q[#<_ini[RAPIDCHANGEATC]MANUAL_CHANGE_TIMEOUT_SEC>] P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
+        o122 if [#5399 ne 1]
+            (msg, Failed! Manual tool change timed out.)
+        o122 return [-122]
+        o122 endif
+
+        ; Clear DO to reset hal_manualtoolchange
+        M65 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGE_DO>]
 
         G49 ; clear current tool offset
     o120 endif
@@ -120,14 +126,20 @@ o<_rapidchange_m6> sub
         M66 L0 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
         o141 if [#5399 ne 0]
             (msg, Failed! Tool changed DI hung high.)
-        o141 return [-3]
+        o141 return [-141]
         o141 endif
 
         ; set DO to trigger hal_manualtoolchange
         M64 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGE_DO>]
-        ; Wait for DI from hal_manualtoolchange to continue
-        M65 L3 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
-        ; Clear DO to trigger hal_manualtoolchange
+
+        ; Wait for rising DI from hal_manualtoolchange to continue
+        M66 L1 Q[#<_ini[RAPIDCHANGEATC]MANUAL_CHANGE_TIMEOUT_SEC>] P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGED_DI>]
+        o142 if [#5399 ne 1]
+            (msg, Failed! Manual tool change timed out.)
+        o142 return [-142]
+        o142 endif
+
+        ; Clear DO to reset hal_manualtoolchange
         M65 P[#<_ini[RAPIDCHANGEATC]TOOL_CHANGE_DO>]
         
         ; Run builtin M6 to update tool data

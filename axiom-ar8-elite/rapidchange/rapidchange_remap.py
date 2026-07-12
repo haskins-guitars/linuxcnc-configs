@@ -152,7 +152,7 @@ def rapidchange_change_prolog(self, **words):
             self.params["rc_pickup_x"] = pickup_x
             self.params["rc_pickup_y"] = pickup_y
 
-        suppress_probe = do_manual_pickup and self.rapidchange.PROBE_AFTER_MANUAL_LOAD
+        suppress_probe = do_manual_pickup and not self.rapidchange.PROBE_AFTER_MANUAL_LOAD
         do_pickup = do_rc_pickup or do_manual_pickup
 
         do_probe = do_pickup and not suppress_probe
